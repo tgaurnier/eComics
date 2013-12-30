@@ -1,0 +1,8 @@
+# Project file
+*.geany
+
+# Automatically backed up files
+*~
+
+# Compiled Object files
+obj
