@@ -1,78 +1,103 @@
-GUI_PATHS		=	-I/usr/include/qt5\
-					-I/usr/include/qt5/QtGui\
-					-I/usr/include/qt5/QtCore\
-					-I/usr/include/qt5/QtQuick\
-					-I/usr/include/qt5/QtConcurrent\
-					-I/usr/include/qt5/QtQml
+ # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+ # Makefile                                                                    #
+ #                                                                             #
+ # Copyright YEAR Tory Gaurnier <tory.gaurnier@linuxmail.org>                  #
+ #                                                                             #
+ # This program is free software; you can redistribute it and/or modify        #
+ # it under the terms of the GNU Lesser General Public License as published by #
+ # the Free Software Foundation; version 3.                                    #
+ #                                                                             #
+ # This program is distributed in the hope that it will be useful,             #
+ # but WITHOUT ANY WARRANTY; without even the implied warranty of              #
+ # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               #
+ # GNU Lesser General Public License for more details.                         #
+ #                                                                             #
+ # You should have received a copy of the GNU Lesser General Public License    #
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.       #
+ # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-GUI_FLAGS		=	-fPIC # Flags for gui
-LIBRARY_FLAGS	=	`xml2-config --cflags` # Flags for library.o
-CFLAGS			=	-g -c -Wall
-LIBS			=	`xml2-config --libs` -larchive -lQt5Gui -lQt5Core -lQt5Quick -lQt5Qml
+#!/bin/bash
 
-OBJECTS			=	obj/main.o obj/config.o obj/gui.moc.o obj/gui.o obj/qtgui.moc.o obj/qtgui.o\
-					obj/library.o obj/archive.o obj/str.o obj/strarr.o obj/files.o obj/misc.o
 
-QML_FILES := $(patsubst src/gui/qml/%.qml, bin/qml/%.qml, $(wildcard src/gui/qml/*.qml))
-JS_FILES := $(patsubst src/gui/js/%.js, bin/js/%.js, $(wildcard src/gui/js/*.js))
+############################################ VARIABLES #############################################
 
-all: bin/eComics $(QML_FILES) $(JS_FILES)
+DEFINES		=	-DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB
 
-bin/eComics: $(OBJECTS)
-	g++ $(OBJECTS) $(LIBS) -g -o bin/eComics
+INC_PATH	=	-I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I. -I.\
+				-I/usr/include/qt5\
+				-I/usr/include/qt5/QtWidgets\
+				-I/usr/include/qt5/QtGui\
+				-I/usr/include/qt5/QtCore -I.\
+				-I/usr/include/poppler/qt5
 
-bin/qml/%.qml: src/gui/qml/%.qml
-	cp -u $< $@
+CXX_FLAGS	=	-c -std=c++0x -m64 -O2 -fPIE -Wall -W -ggdb $(DEFINES)
 
-bin/js/%.js: src/gui/js/%.js
-	cp -u $< $@
+LIBS		=	-lQt5Widgets -lQt5Gui -lQt5Core -lpodofo -lpoppler-qt5
 
-obj/main.o: src/main.c src/config.h src/gui/gui.h src/library.h src/globalvars.h src/files.h
-	gcc $< $(CFLAGS) -o $@
+MOC_SRC		=	moc/moc_Actions.cpp\
+				moc/moc_Archive.cpp\
+				moc/moc_ComicFile.cpp\
+				moc/moc_ComicInfo.cpp\
+				moc/moc_ComicInfoDialog.cpp\
+				moc/moc_DelimitedCompleter.cpp\
+				moc/moc_LibraryView.cpp\
+				moc/moc_MainSidePane.cpp\
+				moc/moc_MainView.cpp\
+				moc/moc_MainWindow.cpp\
+				moc/moc_MetadataTag.cpp\
+				moc/moc_Page.cpp
 
-obj/config.o: src/config.c src/config.h src/gui/gui.h src/files.h src/misc.h src/globalvars.h\
-		src/str.h src/globaldefs.h
-	gcc $< $(CFLAGS) -o $@
+MOC_OBJ		=	$(MOC_SRC:%.cpp=%.o)
 
-src/gui/moc/gui.moc.cpp: src/gui/gui.h src/gui/gui.cpp
-	moc $< $(GUI_PATHS) -o $@
+OBJECTS		=	obj/Actions.o\
+				obj/Archive.o\
+				obj/ComicFile.o\
+				obj/ComicInfo.o\
+				obj/ComicInfoDialog.o\
+				obj/Config.o\
+				obj/DelimitedCompleter.o\
+				obj/FileTypeList.o\
+				obj/FixedGridLayout.o\
+				obj/LibraryView.o\
+				obj/Library.o\
+				obj/MainSidePane.o\
+				obj/MainView.o\
+				obj/MainWindow.o\
+				obj/MenuBar.o\
+				obj/MetadataTag.o\
+				obj/Page.o\
+				obj/PageListView.o\
+				obj/Pdf.o\
+				obj/ToolBar.o
 
-obj/gui.moc.o: src/gui/moc/gui.moc.cpp
-	g++ $< $(CFLAGS) $(GUI_FLAGS) $(GUI_PATHS) -o $@
+# Dependency files created by `g++ -MMD -MP`
+DEPS		=	$(patsubst obj/%.o, dep/%.d, $(OBJECTS)) dep/main.d
 
-obj/gui.o: src/gui/gui.cpp src/gui/gui.h src/gui/qtgui.h src/config.h src/globalvars.h\
-		src/globaldefs.h src/library.h src/files.h src/misc.h
-	g++ $< $(GUI_PATHS) $(GUI_FLAGS) $(CFLAGS) -o $@
 
-src/gui/moc/qtgui.moc.cpp: src/gui/qtgui.h src/gui/qtgui.cpp
-	moc $< $(GUI_PATHS) -o $@
+############################################### RULES ##############################################
 
-obj/qtgui.moc.o: src/gui/moc/qtgui.moc.cpp
-	g++ $< $(CFLAGS) $(GUI_FLAGS) $(GUI_PATHS) -o $@
+all: bin/eComics
 
-obj/qtgui.o: src/gui/qtgui.cpp src/gui/qtgui.h src/gui/gui.h src/globalvars.h src/library.h\
-		src/config.h src/strarr.h src/files.h src/str.h src/misc.h
-	g++ $< $(GUI_PATHS) $(GUI_FLAGS) $(CFLAGS) -o $@
+bin/eComics: obj/main.o $(MOC_OBJ) $(OBJECTS)
+	g++ $^ $(LIBS) -o bin/eComics
 
-obj/library.o: src/library.c src/library.h src/globalvars.h src/globaldefs.h src/archive.h\
-		src/files.h src/strarr.h src/str.h src/misc.h src/gui/gui.h
-	gcc $< $(LIBRARY_FLAGS) $(CFLAGS) -o $@
+# Build all moc src files
+$(MOC_SRC): moc/moc_%.cpp: src/%.hpp src/%.cpp
+	moc $< $(INC_PATH) -o $@
 
-obj/archive.o: src/archive.c src/archive.h src/files.h src/misc.h src/globalvars.h src/globaldefs.h
-	gcc $< $(CFLAGS) -o $@
+# Build all moc objects
+$(MOC_OBJ): moc/moc_%.o: moc/moc_%.cpp
+	g++ $< $(INC_PATH) $(CXX_FLAGS) -o $@
 
-obj/str.o: src/str.c src/str.h src/misc.h
-	gcc $< $(CFLAGS) -o $@
+# Build main.o
+obj/main.o: src/main.cpp
+	g++ $< -MMD -MF dep/main.d $(INC_PATH) $(CXX_FLAGS) -o $@
 
-obj/strarr.o: src/strarr.c src/strarr.h src/misc.h src/str.h
-	gcc $< $(CFLAGS) -o $@
-
-obj/files.o: src/files.c src/files.h src/misc.h src/globalvars.h src/globaldefs.h src/strarr.h\
-		src/str.h src/archive.h
-	gcc $< $(CFLAGS) -o $@
-
-obj/misc.o: src/misc.c src/misc.h src/str.h
-	gcc $< $(CFLAGS) -o $@
+# Build all objects (except main.o), -MMD -MF generates dependencies
+$(OBJECTS): obj/%.o: src/%.cpp
+	g++ $< -MMD -MF dep/$*.d $(INC_PATH) $(CXX_FLAGS) -o $@
 
 clean:
-	rm -f obj/*.o src/gui/moc/*.moc.cpp bin/eComics bin/qml/*.qml bin/js/*.js
+	rm -f obj/* dep/* moc/* bin/eComics
+
+-include $(DEPS)

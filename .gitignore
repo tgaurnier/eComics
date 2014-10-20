@@ -1,8 +1,15 @@
-# Project file
-*.geany
+# Komodo files
+.komodotools
+*.komodoproject
 
 # Automatically backed up files
 *~
+
+# Dependency files
+dep
+
+# Moc files
+moc
 
 # Compiled Object files
 obj
