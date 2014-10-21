@@ -5,6 +5,9 @@
 # Automatically backed up files
 *~
 
+# Bin directory
+bin
+
 # Dependency files
 dep
 

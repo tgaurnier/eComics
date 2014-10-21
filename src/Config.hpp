@@ -39,6 +39,7 @@ class Config : public QObject {
 		static void destroy();
 		void save();
 		const QString& getBinDir() const;
+		QString getIconPath() const;
 		QDir getRootDir() const;
 		QDir getThumbDir() const;
 		QDir getTempDir() const;
@@ -59,6 +60,7 @@ class Config : public QObject {
 
 	private:
 		QFile *file;
+		QString icon_path;
 		QString bin_dir;
 		QDir root_dir;
 		QDir thumb_dir;

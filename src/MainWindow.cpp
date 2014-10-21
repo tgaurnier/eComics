@@ -57,6 +57,8 @@ MainWindow::MainWindow() {
 	// Initialize config singleton
 	Config::init();
 
+	setWindowIcon(QIcon(config->getIconPath()));
+
 	// If config is empty, launch first run dialog
 	if(config->isEmpty()) {
 		//TODO: THIS IS TEMPORARY UNTIL I MAKE FIRST RUN DIALOG

@@ -70,6 +70,7 @@ void Config::save() {
 /**
  * Basic getter methods, simply return appropriate value.
  */
+QString Config::getIconPath() const { return icon_path; }
 const QString& Config::getBinDir() const { return bin_dir; }
 QDir Config::getRootDir() const { return root_dir; }
 QDir Config::getThumbDir() const { return thumb_dir; }
@@ -115,6 +116,9 @@ Config::Config() {
 
 	// Set bin_dir
 	bin_dir = QCoreApplication::applicationDirPath();
+
+	// Set icon_path
+	icon_path = bin_dir + "/../res/images/eComics.svg";
 
 	// Check if config dir exists, if it doesn't create it
 	root_dir.cd(QDir::homePath());
