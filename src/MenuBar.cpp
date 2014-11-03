@@ -42,4 +42,7 @@ MenuBar::MenuBar(QMainWindow *parent) : QObject(parent) {
 
 	// Add file actions
 	file_menu->addAction(eComics::actions->quit());
+
+	// Add edit actions
+	edit_menu->addAction(eComics::actions->info());
 }

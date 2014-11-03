@@ -147,13 +147,14 @@ QVariant LibraryView::LibraryModel::data(const QModelIndex &index, int role) con
 			}
 
 			case SERIES_SCOPE: {
-				QList<ComicFile> comic_list = library->getComicsFromSeries(list.at(index.row()));
+				QList<ComicFile> comic_list = library->getComicsFromSeries(list.at(index.row()),
+					(config->groupByPublisher()) ? cur_scope.publisher : 0);
 				return layeredIcon(comic_list);
 			}
 
 			case VOLUME_SCOPE: {
 				QList<ComicFile> comic_list = library->getComicsFromVolume(cur_scope.series,
-					list.at(index.row()));
+					list.at(index.row()), (config->groupByPublisher()) ? cur_scope.publisher : 0);
 				return layeredIcon(comic_list);
 			}
 

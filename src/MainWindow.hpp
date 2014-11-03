@@ -62,12 +62,13 @@ class MainWindow : public QMainWindow {
 	Q_OBJECT
 
 	public:
-		static void init();
+		static bool init();
 		static void destroy();
 
 	private:
-		QStatusBar *status_bar;
-		QSplitter *main_splitter; // Sidebar on left, mainview on right
+		static bool exiting;
+		QStatusBar *status_bar		=	nullptr;
+		QSplitter *main_splitter	=	nullptr; // Sidebar on left, mainview on right
 
 		MainWindow();
 		~MainWindow();

@@ -24,10 +24,10 @@
 DEFINES		=	-DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB
 
 INC_PATH	=	-I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I. -I.\
-				-I/usr/include/qt5\
-				-I/usr/include/qt5/QtWidgets\
-				-I/usr/include/qt5/QtGui\
-				-I/usr/include/qt5/QtCore -I.\
+				-I/usr/include/x86_64-linux-gnu/qt5\
+				-I/usr/include/x86_64-linux-gnu/qt5/QtWidgets\
+				-I/usr/include/x86_64-linux-gnu/qt5/QtGui\
+				-I/usr/include/x86_64-linux-gnu/qt5/QtCore -I.\
 				-I/usr/include/poppler/qt5
 
 CXX_FLAGS	=	-c -std=c++0x -m64 -O2 -fPIE -Wall -W -ggdb $(DEFINES)
@@ -41,6 +41,9 @@ MOC_SRC		=	moc/moc_Actions.cpp\
 				moc/moc_ComicInfoDialog.cpp\
 				moc/moc_DelimitedCompleter.cpp\
 				moc/moc_LibraryView.cpp\
+				moc/moc_FilePathEdit.cpp\
+				moc/moc_FirstRunDialog.cpp\
+				moc/moc_HelpButton.cpp\
 				moc/moc_MainSidePane.cpp\
 				moc/moc_MainView.cpp\
 				moc/moc_MainWindow.cpp\
@@ -56,8 +59,11 @@ OBJECTS		=	obj/Actions.o\
 				obj/ComicInfoDialog.o\
 				obj/Config.o\
 				obj/DelimitedCompleter.o\
+				obj/FilePathEdit.o\
 				obj/FileTypeList.o\
+				obj/FirstRunDialog.o\
 				obj/FixedGridLayout.o\
+				obj/HelpButton.o\
 				obj/LibraryView.o\
 				obj/Library.o\
 				obj/MainSidePane.o\

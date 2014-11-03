@@ -32,6 +32,7 @@ void Config::destroy() {
  * Save config data to file
  */
 void Config::save() {
+	//THIS IS WHERE I'M AT, SAVE NEW CONFIG MEMEBERS TO FILE
 	// Open file for writing
 	if(!file->open(QIODevice::WriteOnly | QIODevice::Text)) {
 		throw eComics::Exception(eComics::FILE_ERROR, "Config::Config()",
@@ -46,6 +47,8 @@ void Config::save() {
 	buff += "is a space on each side of the =, and each setting/value pair MUST be on it's own ";
 	buff += "line.\n\n";
 
+	buff += "manage_files = " + QByteArray::number(manage_files) + "\n";
+	buff += "group_by_publisher = " + QByteArray::number(group_by_publisher) + "\n";
 	buff += "temp_dir = " + temp_dir.absolutePath() + "\n";
 	buff += "thumb_dir = " + thumb_dir.absolutePath() + "\n";
 	buff += QByteArray("comic_enabled = ") + QByteArray::number(comic_enabled) + "\n";
@@ -77,6 +80,7 @@ QDir Config::getThumbDir() const { return thumb_dir; }
 QDir Config::getTempDir() const { return temp_dir; }
 QDir Config::getComicDir() const { return comic_dir; }
 QDir Config::getMangaDir() const { return manga_dir; }
+bool Config::manageFiles() const { return manage_files; }
 bool Config::groupByPublisher() const { return group_by_publisher; }
 bool Config::isEmpty() const { return empty; }
 bool Config::isComicEnabled() const { return comic_enabled; }
@@ -95,6 +99,8 @@ void Config::setComicDir(const QString &path) { setDir(comic_dir, path); }
 void Config::setMangaDir(const QString &path) { setDir(manga_dir, path); }
 void Config::setComicEnabled(const bool val) { comic_enabled = val; }
 void Config::setMangaEnabled(const bool val) { manga_enabled = val; }
+void Config::setManageFiles(const bool val) { manage_files = val; }
+void Config::setGroupByPublisher(const bool val) { group_by_publisher = val; }
 void Config::setSelectedList(const QString &val) { selected_list = val; }
 
 
@@ -111,9 +117,6 @@ void Config::setSelectedList(const QString &val) { selected_list = val; }
  * - DIR_ERROR may be thrown if creating/setting dirs fails for any reason.
  */
 Config::Config() {
-	//TODO - MAKE SETTING FOR GROUP BY PUBLISHER, FOR NOW JUST SET IT TO FALSE
-	group_by_publisher = false;
-
 	// Set bin_dir
 	bin_dir = QCoreApplication::applicationDirPath();
 
@@ -201,7 +204,15 @@ void Config::loadFromFile() {
 			continue;
 		}
 
-		if(tok[0] == "temp_dir") {
+		if(tok[0] == "manage_files") {
+			setManageFiles(value.toInt());
+		}
+
+		else if(tok[0] == "group_by_publisher") {
+			setGroupByPublisher(value.toInt());
+		}
+
+		else if(tok[0] == "temp_dir") {
 			setTempDir(value);
 		}
 

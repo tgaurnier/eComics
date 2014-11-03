@@ -47,10 +47,11 @@ Actions::Actions(QWidget *parent) {
 	// Create library navigation actions
 	navigate_back_action	=	new QAction(style->standardIcon(QStyle::SP_ArrowLeft), tr("&Back"),
 								parent);
-	//TODO: FINISH ACTIONS
+	//TODO: THIS IS WHERE I'M AT, FINISH ACTIONS
 
 	// Connect file actions
 	connect(quit_action, SIGNAL(triggered()), qApp, SLOT(quit()));
+
 	//TODO: CONNECT REST OF ACTIONS
 }
 

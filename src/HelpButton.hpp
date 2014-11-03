@@ -1,5 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright 2013 Tory Gaurnier                                                *
+ * HelpButton.hpp                                                               *
+ *                                                                             *
+ * Copyright 2014 Tory Gaurnier <tory.gaurnier@linuxmail.org>                  *
  *                                                                             *
  * This program is free software; you can redistribute it and/or modify        *
  * it under the terms of the GNU Lesser General Public License as published by *
@@ -15,33 +17,33 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
-#include <QDebug>
-#include <QtGlobal>
-#include <QApplication>
-
-#include "Archive.hpp"
-#include "ComicFile.hpp"
-#include "Config.hpp"
-#include "Library.hpp"
-#include "MainWindow.hpp"
+#ifndef HELPBUTTON_HPP
+#define HELPBUTTON_HPP
 
 
-int main(int argc, char **argv) {
-	// First set APP_ID
-	qputenv("APP_ID", "eComics");
+#include <QPushButton>
 
-	// Initialize Qt Application
-	QApplication app(argc, argv);
-	app.setOrganizationName("Tory Gaurnier");
-	app.setApplicationName("eComics");
 
-	// Initialize main window
-	if(!MainWindow::init()) return 0;
+/**
+ * class HelpButton
+ *
+ * A button that when pressed, displays a help message.
+ */
+class HelpButton : public QPushButton {
+	Q_OBJECT
 
-	main_window->show();
-	return app.exec();
+	public:
+		HelpButton(QWidget *parent = 0);
+		HelpButton(const QString &msg, QWidget *parent = 0);
+		~HelpButton();
+		void setMessage(const QString &msg);
 
-	Library::destroy();
-	Config::destroy();
-	MainWindow::destroy();
-}
+	public slots:
+		void onClicked();
+
+	private:
+		QString msg;
+};
+
+
+#endif

@@ -1,28 +1,41 @@
 #include "MainWindow.hpp"
 
+#include <QApplication>
 #include <QSplitter>
 #include <QStatusBar>
 
 #include "Actions.hpp"
 #include "ComicInfoDialog.hpp"
 #include "Config.hpp"
+#include "FirstRunDialog.hpp"
 #include "Library.hpp"
 #include "MainSidePane.hpp"
 #include "MainView.hpp"
 #include "MenuBar.hpp"
 
 
-MainWindow *main_window = nullptr;
+MainWindow *main_window		=	nullptr;
+bool MainWindow::exiting	=	false;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *									MAINWINDOW PUBLIC METHODS 									 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
-void MainWindow::init() {
+/**
+ * Returns false when application is closed prematurely by cancelling first run dialog, returns true
+ * when Window is successfully created or if it already exists.
+ */
+bool MainWindow::init() {
 	if(main_window == nullptr) {
 		main_window = new MainWindow;
+		if(exiting) {
+			MainWindow::destroy();
+			return false;
+		}
 	}
+
+	return true;
 }
 
 
@@ -61,13 +74,16 @@ MainWindow::MainWindow() {
 
 	// If config is empty, launch first run dialog
 	if(config->isEmpty()) {
-		//TODO: THIS IS TEMPORARY UNTIL I MAKE FIRST RUN DIALOG
-		qDebug() << "CONFIG IS EMPTY";
-		config->setComicEnabled(true);
-		config->setMangaEnabled(true);
-		config->setComicDir("/home/kornklown/eLibrary/TEST/Comics");
-		config->setMangaDir("/home/kornklown/eLibrary/TEST/Manga");
-		config->save();
+		int result = FirstRunDialog::run(this);
+
+		// If FirstRunDialog was cancelled then free memory and quit app
+		if(!result) {
+			Config::destroy();
+			// This 'exiting' status needs to be passed back to main() function and then 'return 0'
+			// Using exit(0) here sometimes results in strange segfault with no real stack trace o_O
+			exiting = true;
+			return;
+		}
 	}
 
 	// Initialize library right after Config is finished, but before everything else
@@ -94,7 +110,7 @@ MainWindow::MainWindow() {
 	resize(800, 600);
 
 	// Initialize comic info dialog
-	comic_info_dialog->init(this);
+	ComicInfoDialog::init(this);
 }
 
 
@@ -106,5 +122,5 @@ MainWindow::~MainWindow() {
 	ComicInfoDialog::destroy();
 
 	// Delete all other malloced objects
-	delete main_splitter;
+	if(main_splitter != nullptr) delete main_splitter;
 }

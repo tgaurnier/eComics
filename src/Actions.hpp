@@ -58,6 +58,7 @@ namespace eComics {
 		private:
 			QStyle *style;
 			// File actions
+			QAction *open_action;
 			QAction *new_list_action;
 			QAction *add_comics_action;
 			QAction *quit_action;

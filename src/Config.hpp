@@ -45,6 +45,7 @@ class Config : public QObject {
 		QDir getTempDir() const;
 		QDir getComicDir() const;
 		QDir getMangaDir() const;
+		bool manageFiles() const;
 		bool groupByPublisher() const;
 		bool isEmpty() const;
 		bool isComicEnabled() const;
@@ -56,6 +57,8 @@ class Config : public QObject {
 		void setMangaDir(const QString &path);
 		void setComicEnabled(const bool val);
 		void setMangaEnabled(const bool val);
+		void setManageFiles(const bool val);
+		void setGroupByPublisher(const bool val);
 		void setSelectedList(const QString &val);
 
 	private:
@@ -65,11 +68,12 @@ class Config : public QObject {
 		QDir root_dir;
 		QDir thumb_dir;
 		QDir temp_dir;
-		QDir comic_dir; // Location of comics if comic_enabled == true
-		QDir manga_dir; // Location of manga if manga_enabled == true
+		bool manage_files; // Should eComics rename/move files when necessary?
 		bool group_by_publisher; // Should root level of library be grouped by publisher?
 		bool comic_enabled; // Is comic enabled? (either comic, manga, or both must be enabled)
 		bool manga_enabled; // Is manga enabled?
+		QDir comic_dir; // Location of comics if comic_enabled == true
+		QDir manga_dir; // Location of manga if manga_enabled == true
 		bool empty; // Is configuration empty/missing data? (should only be true on first run)
 		QString selected_list; // Remember last selected library/list on startup
 
