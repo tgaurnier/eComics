@@ -34,6 +34,7 @@ int main(int argc, char **argv) {
 	QApplication app(argc, argv);
 	app.setOrganizationName("Tory Gaurnier");
 	app.setApplicationName("eComics");
+	app.setAttribute(Qt::AA_DontShowIconsInMenus);
 
 	// Initialize main window
 	if(!MainWindow::init()) return 0;

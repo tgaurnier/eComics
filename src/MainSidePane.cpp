@@ -134,7 +134,7 @@ MainSidePane::LibraryListView::~LibraryListView() {
 
 
 /**
- * Deselect item from UserListView, set selected list in Config.
+ * Deselect any selected item from UserListView, set selected list in Config.
  */
 void MainSidePane::LibraryListView::selectionChanged(const QItemSelection &selected,
 		const QItemSelection &deselected) {
