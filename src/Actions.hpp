@@ -43,12 +43,27 @@ namespace eComics {
 
 		public:
 			// Getters for file actions
-			QAction* newList() const { return new_list_action; }
-			QAction* addComics() const { return add_comics_action; }
-			QAction* quit() const { return quit_action; }
+			QAction * open() const { return open_action; }
+			QAction * newList() const { return new_list_action; }
+			QAction * addComics() const { return add_comics_action; }
+			QAction * quit() const { return quit_action; }
 			// Getters for edit actions
-			QAction* addToList() const { return add_to_list_action; }
-			QAction* info() const { return info_action; }
+			QAction * addToList() const { return add_to_list_action; }
+			QAction * info() const { return info_action; }
+			QAction * remove() const { return remove_action; }
+			QAction * deleteFile() const { return delete_action; }
+			QAction * preferences() const { return preferences_action; }
+			// Getters for view actions
+			QAction * fullscreen() const { return fullscreen_action; }
+			QAction * sidePane() const { return side_pane_action; }
+			QAction * statusbar() const { return statusbar_action; }
+			// Getters for tools actions
+			QAction * scanLibrary() const { return scan_library_action; }
+			QAction * convert() const { return convert_action; }
+			// Getters for help actions
+			QAction * about() const { return about_action; }
+			QAction * faq() const { return faq_action; }
+			QAction * reportBug() const { return report_bug_action; }
 			// Getters for library navigation actions
 			QAction* navigateBack() const { return navigate_back_action; }
 

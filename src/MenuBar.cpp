@@ -41,8 +41,29 @@ MenuBar::MenuBar(QMainWindow *parent) : QObject(parent) {
 	help_menu	=	q_menu_bar->addMenu(tr("&Help"));
 
 	// Add file actions
+	file_menu->addAction(eComics::actions->open());
+	file_menu->addAction(eComics::actions->newList());
+	file_menu->addAction(eComics::actions->addComics());
 	file_menu->addAction(eComics::actions->quit());
 
 	// Add edit actions
+	edit_menu->addAction(eComics::actions->addToList());
 	edit_menu->addAction(eComics::actions->info());
+	edit_menu->addAction(eComics::actions->remove());
+	edit_menu->addAction(eComics::actions->deleteFile());
+	edit_menu->addAction(eComics::actions->preferences());
+
+	// Add view actions
+	view_menu->addAction(eComics::actions->fullscreen());
+	view_menu->addAction(eComics::actions->sidePane());
+	view_menu->addAction(eComics::actions->statusbar());
+
+	// Add tools actions
+	tools_menu->addAction(eComics::actions->scanLibrary());
+	tools_menu->addAction(eComics::actions->convert());
+
+	// Add help actions
+	help_menu->addAction(eComics::actions->about());
+	help_menu->addAction(eComics::actions->faq());
+	help_menu->addAction(eComics::actions->reportBug());
 }
