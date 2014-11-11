@@ -72,6 +72,8 @@ class MainWindow : public QMainWindow {
 
 		MainWindow();
 		~MainWindow();
+	private slots:
+		void toggleFullscreen();
 };
 
 extern MainWindow *main_window;

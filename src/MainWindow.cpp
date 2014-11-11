@@ -111,6 +111,10 @@ MainWindow::MainWindow() {
 
 	// Initialize comic info dialog
 	ComicInfoDialog::init(this);
+
+	// Connect signals to actions
+	connect(eComics::actions->quit(), SIGNAL(triggered()), qApp, SLOT(quit()));
+	connect(eComics::actions->fullscreen(), SIGNAL(triggered()), this, SLOT(toggleFullscreen()));
 }
 
 
@@ -123,4 +127,15 @@ MainWindow::~MainWindow() {
 
 	// Delete all other malloced objects
 	if(main_splitter != nullptr) delete main_splitter;
+}
+
+
+void MainWindow::toggleFullscreen() {
+	if(config->isFullscreen()) {
+		showNormal();
+		config->setFullscreen(false);
+	} else {
+		showFullScreen();
+		config->setFullscreen(true);
+	}
 }
