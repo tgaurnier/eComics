@@ -28,6 +28,7 @@
 #include <QAction>
 
 
+class QShortcut;
 class QStyle;
 
 
@@ -36,7 +37,10 @@ namespace eComics {
 	 * class Actions
 	 *
 	 * A singleton object, which contains all of the global actions in the application, these
-	 * actions can be used in anything from the menu bar, to right click menus.
+	 * actions can be used in anything from the menu bar, to right click menus. Most of these
+	 * actions are connected in other classes (for example, fullscreen_action is connected in
+	 * MainWindow.cpp), only certain actions are connected to 'local' slots (such as
+	 * add_comics_action is connected).
 	 */
 	class Actions : public QObject {
 		Q_OBJECT
@@ -71,6 +75,7 @@ namespace eComics {
 			static void destroy();
 
 		private:
+			QShortcut *f12_shortcut;
 			QStyle *style;
 			// File actions
 			QAction *open_action;
@@ -99,6 +104,9 @@ namespace eComics {
 
 			Actions(QWidget *parent);
 			~Actions();
+
+		private slots:
+			void addComicsActivated();
 	};
 
 

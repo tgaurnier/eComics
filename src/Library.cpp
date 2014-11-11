@@ -33,6 +33,18 @@ void Library::destroy() {
 }
 
 
+void Library::append(const ComicFile &comic) {
+	QList<ComicFile>::append(comic);
+	emit (*this)[comic.getPath()].addedToLibrary();
+}
+
+
+void Library::append(const QList<ComicFile> &comic_list) {
+	QList<ComicFile>::append(comic_list);
+	for(ComicFile comic : comic_list) emit (*this)[comic.getPath()].addedToLibrary();
+}
+
+
 /**
  * Return list of comics from publisher.
  */
@@ -52,7 +64,8 @@ QList<ComicFile> Library::getComicsFromPublisher(const QString &publisher) const
 /**
  * Return list of comics from series.
  */
-QList<ComicFile> Library::getComicsFromSeries(const QString &series, const QString &publisher) const {
+QList<ComicFile> Library::getComicsFromSeries(const QString &series, const QString &publisher)
+		const {
 	QList<ComicFile> list;
 
 	for(const ComicFile &comic : *this) {
@@ -187,6 +200,38 @@ int Library::indexOf(const QString &path) const {
 	}
 
 	return -1;
+}
+
+
+void Library::insert(int i, const ComicFile &comic) {
+	QList<ComicFile>::insert(i, comic);
+	emit (*this)[comic.getPath()].addedToLibrary();
+}
+
+
+typedef QList<ComicFile>::iterator iterator;
+iterator Library::insert(iterator before, const ComicFile &comic) {
+	iterator iter = QList<ComicFile>::insert(before, comic);
+	emit iter->addedToLibrary();
+	return iter;
+}
+
+
+void Library::push_back(const ComicFile &comic) {
+	QList<ComicFile>::push_back(comic);
+	emit (*this)[comic.getPath()].addedToLibrary();
+}
+
+
+void Library::push_front(const ComicFile &comic) {
+	QList<ComicFile>::push_front(comic);
+	emit (*this)[comic.getPath()].addedToLibrary();
+}
+
+
+void Library::replace(int i, const ComicFile &comic) {
+	QList<ComicFile>::replace(i, comic);
+	emit (*this)[comic.getPath()].addedToLibrary();
 }
 
 
@@ -400,6 +445,34 @@ const ComicFile & Library::at(const QString &path) const {
 	if(this->contains(path)) {
 		return this->at(this->indexOf(path));
 	} else return null;
+}
+
+
+Library & Library::operator+=(const QList<ComicFile> &comic_list) {
+	QList<ComicFile>::operator+=(comic_list);
+	for(ComicFile comic : comic_list) emit (*this)[comic.getPath()].addedToLibrary();
+	return *this;
+}
+
+
+Library & Library::operator+=(const ComicFile &comic) {
+	QList<ComicFile>::operator+=(comic);
+	emit (*this)[comic.getPath()].addedToLibrary();
+	return *this;
+}
+
+
+Library & Library::operator<<(const QList<ComicFile> &comic_list) {
+	QList<ComicFile>::operator<<(comic_list);
+	for(ComicFile comic : comic_list) emit (*this)[comic.getPath()].addedToLibrary();
+	return *this;
+}
+
+
+Library & Library::operator<<(const ComicFile &comic) {
+	QList<ComicFile>::operator<<(comic);
+	emit (*this)[comic.getPath()].addedToLibrary();
+	return *this;
 }
 
 

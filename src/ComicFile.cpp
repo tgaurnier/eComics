@@ -43,16 +43,23 @@ ComicFile::ComicFile(const QString &path) : QFile(path) {
 
 	// Check if current comic is already in library using path
 	if(library->contains(path)) {
+		in_library = true;
+
+		// If md5 hash matches then just copy metadata, otherwise parse it from file
 		const ComicFile &comic = library->at(path);
 		if(getMd5Hash() == comic.getMd5Hash()) {
 			info = comic.info;
 		} else populateComicInfo();
+
+		// Make sure that appropriate attributes are in one of the lists
+		parseAttributeLists();
+	} else {
+		// If not in library just parse file for info
+		in_library = false;
+		populateComicInfo();
 	}
 
 	info.setParent(this);
-
-	// Make sure that appropriate attributes are in one of the lists
-	parseAttributeLists();
 
 	// Make sure thumbnail exists
 	verifyThumb();
@@ -76,8 +83,12 @@ ComicFile::ComicFile(const QString &path, const ComicInfo &_info, const QByteArr
 
 	info.setParent(this);
 
-	// Make sure that appropriate attributes are in one of the lists
-	parseAttributeLists();
+	if(library->contains(path)) {
+		in_library = true;
+
+		// Make sure that appropriate attributes are in one of the lists
+		parseAttributeLists();
+	} else in_library = false;
 
 	// Make sure thumbnail exists
 	verifyThumb();
@@ -94,6 +105,50 @@ ComicFile::~ComicFile() {
 	if(pdf != nullptr) {
 		delete pdf;
 	}
+}
+
+
+/**
+ * This is a convenience method, moves file to either comics or manga directory, if
+ * config->manageFiles() is true then also renames file as appropriate.
+ */
+void ComicFile::move() {
+	QDir dir("/");
+	QString new_dir_path;
+	QString new_file_name;
+
+	// Dir path for comics
+	if((config->isComicEnabled() && !config->isMangaEnabled()) ||
+			(config->isComicEnabled() && info.getManga() == "No")) {
+		new_dir_path = config->getComicDir().absolutePath() + "/";
+	}
+
+	// Dir path for manga
+	else if((config->isMangaEnabled() && !config->isComicEnabled()) ||
+			(config->isMangaEnabled() && info.getManga() == "Yes")) {
+
+	}
+
+	// If managing files, add directories as appropriate, and rename file
+	if(config->manageFiles()) {
+		// comic|manga_dir/publisher/series/volume/filename.ext
+		new_dir_path	+=	info.getPublisher() + "/" + info.getSeries() + "/" +
+							((info.getVolume().isEmpty()) ? "Unknown Volume" : info.getVolume()) +
+							"/";
+		new_file_name	=	info.getSeries();
+		if(!info.getVolume().isEmpty()) new_file_name += QString(" Vol. ") + info.getVolume();
+		if(!info.getNumber().isEmpty()) new_file_name += QString(" No. ") + info.getNumber();
+		new_file_name += QString(" - ") + info.getTitle();
+		new_file_name += getPath().mid(getPath().lastIndexOf('.'));
+	} else {
+		// Else keep in root of comic|manga_dir, and don't rename file
+		new_file_name = getPath().mid(getPath().lastIndexOf("/") + 1);
+	}
+
+	// Ensure new path exists, then move file
+	dir.mkpath(new_dir_path);
+	dir.rename(getPath(), new_dir_path + new_file_name);
+	setFileName(new_dir_path);
 }
 
 
@@ -417,6 +472,7 @@ ComicFile & ComicFile::operator =(const ComicFile &comic) {
 void ComicFile::connectSignals() {
 	connect(&info, SIGNAL(tagChanged(const MetadataTag &, const QString)), this,
 		SLOT(onInfoChanged(const MetadataTag &, const QString)));
+	connect(this, SIGNAL(addedToLibrary()), this, SLOT(onAddedToLibrary()));
 }
 
 
@@ -616,7 +672,7 @@ void ComicFile::parseAttributeLists() {
 
 
 /**
- * Populates ComicInfo in any way possible, first checks library for existing info, then loads from
+ * Populates ComicInfo in any way possible, first checks file for existing info, then loads from
  * xml, if that doesn't work or there is no xml, then it parses file name to try to get as much info
  * as possible.
  */
@@ -975,6 +1031,12 @@ void ComicFile::verifyThumb() {
 }
 
 
+void ComicFile::onAddedToLibrary() {
+	in_library = true;
+	parseAttributeLists();
+}
+
+
 void ComicFile::onInfoChanged(const MetadataTag &tag, const QString old_value) {
 	if(!editing) {
 		// Populate original_info with values, including old_value
@@ -993,7 +1055,7 @@ void ComicFile::onInfoChanged(const MetadataTag &tag, const QString old_value) {
 
 		// Save info to file and library
 		save();
-		library->save();
+		if(in_library) library->save();
 	} else {
 		dirty = true;
 	}

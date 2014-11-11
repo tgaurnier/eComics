@@ -64,10 +64,14 @@ class ComicFile : public QFile {
 		QString getThumbPath(const ComicInfo &comic_info = 0) const;
 		QByteArray getMd5Hash() const;
 		bool isNull() const;
+		void move();
 		void save();
 		void startEditing();
 		void finishEditing();
 		ComicFile & operator =(const ComicFile &comic);
+
+	signals:
+		void addedToLibrary();
 
 	private:
 		// With TYPE_UNSUPPORTED, ComicType can act like a bool
@@ -85,6 +89,7 @@ class ComicFile : public QFile {
 		Pdf *pdf			=	nullptr; // Object for managing TYPE_PDF
 		bool dirty			=	false;
 		bool editing		=	false;
+		bool in_library;
 
 		void connectSignals();
 		QString getXmlBuf() const;
@@ -100,6 +105,7 @@ class ComicFile : public QFile {
 
 	private slots:
 		void onInfoChanged(const MetadataTag &tag, const QString old_value);
+		void onAddedToLibrary();
 };
 
 #endif

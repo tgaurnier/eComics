@@ -59,6 +59,8 @@ class Library : public QList<ComicFile> {
 
 		static void init();
 		static void destroy();
+		void append(const ComicFile &comic);
+		void append(const QList<ComicFile> &comic_list);
 		QList<ComicFile> getComicsFromPublisher(const QString &publisher) const;
 		QList<ComicFile> getComicsFromSeries(const QString &series,
 			const QString &publisher = 0) const;
@@ -73,6 +75,11 @@ class Library : public QList<ComicFile> {
 		bool contains(QString path) const;
 		int indexOf(const QByteArray &md5_hash) const;
 		int indexOf(const QString &path) const;
+		void insert(int i, const ComicFile &comic);
+		iterator insert(iterator before, const ComicFile &comic);
+		void push_back(const ComicFile &comic);
+		void push_front(const ComicFile &comic);
+		void replace(int i, const ComicFile &comic);
 		void scanDirectories();
 		void save();
 		void startBatchEditing();
@@ -80,6 +87,10 @@ class Library : public QList<ComicFile> {
 		using QList::at;
 		const ComicFile & at(const QByteArray &md5_hash) const;
 		const ComicFile & at(const QString &path) const;
+		Library & operator+=(const QList<ComicFile> &comic_list);
+		Library & operator+=(const ComicFile &comic);
+		Library & operator<<(const QList<ComicFile> &comic_list);
+		Library & operator<<(const ComicFile &comic);
 		using QList::operator[];
 		ComicFile & operator[](const QByteArray &md5_hash);
 		const ComicFile & operator[](const QByteArray &md5_hash) const;

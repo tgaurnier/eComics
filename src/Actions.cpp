@@ -1,7 +1,16 @@
 #include "Actions.hpp"
 
 #include <QApplication>
+#include <QDir>
+#include <QErrorMessage>
+#include <QFileDialog>
+#include <QShortcut>
 #include <QStyle>
+
+#include "ComicFile.hpp"
+#include "Library.hpp"
+#include "LibraryView.hpp"
+#include "MainWindow.hpp"
 
 
 using namespace eComics;
@@ -34,7 +43,10 @@ void Actions::destroy() {
 
 
 Actions::Actions(QWidget *parent) {
-	style = QApplication::style();
+	//TODO: THIS IS WHERE I'M AT, FINISH CONNECTING ACTIONS
+	f12_shortcut	=	new QShortcut(QKeySequence("F12"), parent);
+	style			=	QApplication::style();
+
 	// Create file actions
 	open_action			=	new QAction(tr("&Open"), parent);
 	new_list_action		=	new QAction(tr("&New list"), parent);
@@ -67,10 +79,11 @@ Actions::Actions(QWidget *parent) {
 	navigate_back_action	=	new QAction(style->standardIcon(QStyle::SP_ArrowLeft), tr("&Back"),
 								parent);
 
-	// Connect file actions
-	connect(quit_action, SIGNAL(triggered()), qApp, SLOT(quit()));
+	// Connect actions to local slots
+	connect(add_comics_action, SIGNAL(triggered()), this, SLOT(addComicsActivated()));
 
-	//TODO: CONNECT REST OF ACTIONS
+	// Connect keyboard shortcuts
+	connect(f12_shortcut, SIGNAL(activated()), fullscreen_action, SIGNAL(triggered()));
 }
 
 
@@ -104,4 +117,29 @@ Actions::~Actions() {
 
 	// Delete library navigation actions
 	delete navigate_back_action;
+}
+
+
+/**
+ * Open a files select dialog, copy selected comics to comics or manga dir, then add to library.
+ */
+void Actions::addComicsActivated() {
+	QStringList path_list	=	QFileDialog::getOpenFileNames(
+								main_window,
+								"Select comics to import",
+								QDir::homePath(),
+								"Comic files(*.cb7 *.7z *.cbr *.rar *.cbz *zip *.pdf)");
+
+	for(QString path : path_list) {
+		ComicFile comic(path);
+
+		if(comic.isNull()) {
+			QErrorMessage err_msg(main_window);
+			err_msg.showMessage(QString("Failed to open ") + path);
+		} else {
+			comic.move();
+			library->append(comic);
+			library_view->refreshModel();
+		}
+	}
 }
