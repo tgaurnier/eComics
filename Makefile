@@ -58,6 +58,7 @@ OBJECTS		=	obj/Actions.o\
 				obj/ComicInfo.o\
 				obj/ComicInfoDialog.o\
 				obj/Config.o\
+				obj/ConfirmationDialog.o\
 				obj/DelimitedCompleter.o\
 				obj/FilePathEdit.o\
 				obj/FileTypeList.o\
