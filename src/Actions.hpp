@@ -107,6 +107,8 @@ namespace eComics {
 
 		private slots:
 			void addComicsActivated();
+			void deleteSelectedComics();
+			void removeSelectedComics();
 	};
 
 

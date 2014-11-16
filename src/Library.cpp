@@ -229,6 +229,36 @@ void Library::push_front(const ComicFile &comic) {
 }
 
 
+int Library::removeAll(const ComicFile &comic) {
+	QList::removeAll(comic);
+	save();
+}
+
+
+void Library::removeAt(int i) {
+	QList::removeAt(i);
+	save();
+}
+
+
+void Library::removeFirst() {
+	QList::removeFirst();
+	save();
+}
+
+
+void Library::removeLast() {
+	QList::removeLast();
+	save();
+}
+
+
+bool Library::removeOne(const ComicFile &comic) {
+	QList::removeOne(comic);
+	save();
+}
+
+
 void Library::replace(int i, const ComicFile &comic) {
 	QList<ComicFile>::replace(i, comic);
 	emit (*this)[comic.getPath()].addedToLibrary();

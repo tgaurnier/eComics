@@ -79,6 +79,11 @@ class Library : public QList<ComicFile> {
 		iterator insert(iterator before, const ComicFile &comic);
 		void push_back(const ComicFile &comic);
 		void push_front(const ComicFile &comic);
+		int removeAll(const ComicFile &comic);
+		void removeAt(int i);
+		void removeFirst();
+		void removeLast();
+		bool removeOne(const ComicFile &comic);
 		void replace(int i, const ComicFile &comic);
 		void scanDirectories();
 		void save();

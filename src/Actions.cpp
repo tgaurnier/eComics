@@ -8,6 +8,7 @@
 #include <QStyle>
 
 #include "ComicFile.hpp"
+#include "ConfirmationDialog.hpp"
 #include "Library.hpp"
 #include "LibraryView.hpp"
 #include "MainWindow.hpp"
@@ -81,6 +82,8 @@ Actions::Actions(QWidget *parent) {
 
 	// Connect actions to local slots
 	connect(add_comics_action, SIGNAL(triggered()), this, SLOT(addComicsActivated()));
+	connect(remove_action, SIGNAL(triggered()), this, SLOT(removeSelectedComics()));
+	connect(delete_action, SIGNAL(triggered()), this, SLOT(deleteSelectedComics()));
 
 	// Connect keyboard shortcuts
 	connect(f12_shortcut, SIGNAL(activated()), fullscreen_action, SIGNAL(triggered()));
@@ -142,4 +145,57 @@ void Actions::addComicsActivated() {
 			library_view->refreshModel();
 		}
 	}
+}
+
+
+/**
+ * Deletes selected comics from library and disk.
+ */
+void Actions::deleteSelectedComics() {
+	ReferenceList<ComicFile> selected_list = library_view->getSelectedComics();
+
+	if(selected_list.isEmpty()) {
+		qDebug() << "Logic error: 'Delete' should be grayed out if no comics selected.";
+		return;
+	}
+
+	QString title	=	"Confirm delete";
+	QString msg		=	"Are you sure you want to delete ";
+	msg += (
+		(selected_list.size() > 1) ? QString::number(selected_list.size()) + " comics?" :
+		selected_list[0].getPath()
+	);
+	msg += "\n\nCan not be undone!";
+
+	if(ConfirmationDialog::exec(title, msg, main_window)) {
+		for(ComicFile comic : selected_list) {
+			QString path = comic.getPath().mid(0, comic.getPath().lastIndexOf("/"));
+			library->removeOne(comic);
+			comic.remove();
+
+			// Remove folders if empty
+			if(QDir(path).entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() == 0) {
+				QDir root_dir;
+				if(path.contains(config->getComicDir().absolutePath())) {
+					root_dir = config->getComicDir();
+				} if(path.contains(config->getMangaDir().absolutePath())) {
+					root_dir = config->getMangaDir();
+				}
+
+				root_dir.rmpath(path);
+			}
+		}
+
+		library_view->refreshModel();
+	}
+
+}
+
+
+/**
+ * Removes selected comics from library, and moves files to desktop.
+ */
+void Actions::removeSelectedComics() {
+	//TODO
+	ReferenceList<ComicFile> selected_list = library_view->getSelectedComics();
 }

@@ -69,6 +69,7 @@ class ComicFile : public QFile {
 		void startEditing();
 		void finishEditing();
 		ComicFile & operator =(const ComicFile &comic);
+		bool operator ==(const ComicFile &comic);
 
 	signals:
 		void addedToLibrary();

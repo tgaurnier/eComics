@@ -464,6 +464,14 @@ ComicFile & ComicFile::operator =(const ComicFile &comic) {
 }
 
 
+/**
+ * Compare md5 hash.
+ */
+bool ComicFile::operator ==(const ComicFile &comic) {
+	return (md5_hash == comic.md5_hash);
+}
+
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *									COMICFILE PRIVATE METHODS 									 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
