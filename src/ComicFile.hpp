@@ -102,6 +102,7 @@ class ComicFile : public QFile {
 		void processError(QProcess::ProcessError error);
 		void initMd5Hash();
 		bool initFileType();
+		void setFileName(const QString &path);
 		void verifyThumb();
 
 	private slots:

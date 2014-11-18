@@ -126,7 +126,7 @@ void ComicFile::move() {
 	// Dir path for manga
 	else if((config->isMangaEnabled() && !config->isComicEnabled()) ||
 			(config->isMangaEnabled() && info.getManga() == "Yes")) {
-
+		new_dir_path = config->getMangaDir().absolutePath() + "/";
 	}
 
 	// If managing files, add directories as appropriate, and rename file
@@ -148,7 +148,7 @@ void ComicFile::move() {
 	// Ensure new path exists, then move file
 	dir.mkpath(new_dir_path);
 	dir.rename(getPath(), new_dir_path + new_file_name);
-	setFileName(new_dir_path);
+	setFileName(new_dir_path + new_file_name);
 }
 
 
@@ -1007,6 +1007,26 @@ void ComicFile::parseFilenameForInfo() {
 		} else {
 			info.setManga("No");
 		}
+	}
+}
+
+
+void ComicFile::setFileName(const QString &path) {
+	if(!QFile::exists(path)) {
+		qDebug() << "ComicFile::setFileName() error:" << path << "doesn't exist.";
+		return;
+	}
+
+	QFile::setFileName(path);
+
+	if(archive != nullptr) {
+		delete archive;
+		archive = new Archive(path);
+	}
+
+	if(pdf != nullptr) {
+		delete pdf;
+		pdf = new Pdf(path);
 	}
 }
 
