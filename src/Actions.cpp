@@ -163,7 +163,7 @@ void Actions::deleteSelectedComics() {
 	QString msg		=	"Are you sure you want to delete ";
 	msg += (
 		(selected_list.size() > 1) ? QString::number(selected_list.size()) + " comics?" :
-		selected_list[0].getPath()
+		selected_list[0].getPath() + "?"
 	);
 	msg += "\n\nCan not be undone!";
 
@@ -188,7 +188,6 @@ void Actions::deleteSelectedComics() {
 
 		library_view->refreshModel();
 	}
-
 }
 
 
@@ -196,6 +195,43 @@ void Actions::deleteSelectedComics() {
  * Removes selected comics from library, and moves files to desktop.
  */
 void Actions::removeSelectedComics() {
-	//TODO
 	ReferenceList<ComicFile> selected_list = library_view->getSelectedComics();
+
+	if(selected_list.isEmpty()) {
+		qDebug() << "Logic error: 'Delete' should be grayed out if no comics selected.";
+		return;
+	}
+
+	QString title	=	"Confirm remove";
+	QString msg		=	"Are you sure you want to remove ";
+	msg += (
+		(selected_list.size() > 1) ? QString::number(selected_list.size())+" comics from library?" :
+		selected_list[0].getPath() + " from library?"
+	);
+	msg += "\n\nFile(s) will be moved to desktop.";
+
+	if(ConfirmationDialog::exec(title, msg, main_window)) {
+		for(ComicFile comic : selected_list) {
+			QString path = comic.getPath().mid(0, comic.getPath().lastIndexOf("/"));
+			QString name = comic.getPath().mid(comic.getPath().lastIndexOf("/") + 1);
+			library->removeOne(comic);
+
+			// Move to desktop
+			QDir("/").rename(comic.getPath(), QDir::homePath() + "/Desktop/" + name);
+
+			// Remove folders if empty
+			if(QDir(path).entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() == 0) {
+				QDir root_dir;
+				if(path.contains(config->getComicDir().absolutePath())) {
+					root_dir = config->getComicDir();
+				} if(path.contains(config->getMangaDir().absolutePath())) {
+					root_dir = config->getMangaDir();
+				}
+
+				root_dir.rmpath(path);
+			}
+		}
+
+		library_view->refreshModel();
+	}
 }
