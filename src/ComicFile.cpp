@@ -749,7 +749,7 @@ void ComicFile::populateComicInfo() {
 				dirty = true;
 				qDebug() << "Corrected Manga tag for" << getPath();
 			}
-		} else {
+		} else if(getPath().contains(config->getComicDir().absolutePath())) {
 			if(info.getManga() != "No") {
 				info.setManga("No");
 				dirty = true;
