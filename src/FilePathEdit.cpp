@@ -158,6 +158,14 @@ void FilePathEdit::setLabelText(const QString &label_text) {
 
 
 /**
+ * Sets path manually to QString path.
+ */
+void FilePathEdit::setPath(const QString &path) {
+	line_edit->setText(path);
+}
+
+
+/**
  * Show dialog, get value, and put user selected path or paths in line_edit.
  */
 void FilePathEdit::openDialog() {

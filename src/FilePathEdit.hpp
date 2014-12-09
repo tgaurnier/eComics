@@ -56,6 +56,7 @@ class FilePathEdit : public QWidget {
 		void setDialogFileMode(QFileDialog::FileMode mode);
 		void setDialogFilter(const QString &filter);
 		void setLabelText(const QString &label_text);
+		void setPath(const QString &path);
 
 	public slots:
 		void openDialog();
