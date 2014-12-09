@@ -77,10 +77,15 @@ void Config::save() {
 QString Config::getIconPath() const { return icon_path; }
 const QString& Config::getBinDir() const { return bin_dir; }
 QDir Config::getRootDir() const { return root_dir; }
+QString Config::getRootPath() const { return root_dir.absolutePath(); }
 QDir Config::getThumbDir() const { return thumb_dir; }
+QString Config::getThumbPath() const { return thumb_dir.absolutePath(); }
 QDir Config::getTempDir() const { return temp_dir; }
+QString Config::getTempPath() const { return temp_dir.absolutePath(); }
 QDir Config::getComicDir() const { return comic_dir; }
+QString Config::getComicPath() const { return comic_dir.absolutePath(); }
 QDir Config::getMangaDir() const { return manga_dir; }
+QString Config::getMangaPath() const { return manga_dir.absolutePath(); }
 bool Config::manageFiles() const { return manage_files; }
 bool Config::groupByPublisher() const { return group_by_publisher; }
 bool Config::isFullscreen() const { return fullscreen; }

@@ -176,9 +176,9 @@ void Actions::deleteSelectedComics() {
 			// Remove folders if empty
 			if(QDir(path).entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() == 0) {
 				QDir root_dir;
-				if(path.contains(config->getComicDir().absolutePath())) {
+				if(path.contains(config->getComicPath())) {
 					root_dir = config->getComicDir();
-				} if(path.contains(config->getMangaDir().absolutePath())) {
+				} if(path.contains(config->getMangaPath())) {
 					root_dir = config->getMangaDir();
 				}
 
@@ -222,9 +222,9 @@ void Actions::removeSelectedComics() {
 			// Remove folders if empty
 			if(QDir(path).entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() == 0) {
 				QDir root_dir;
-				if(path.contains(config->getComicDir().absolutePath())) {
+				if(path.contains(config->getComicPath())) {
 					root_dir = config->getComicDir();
-				} if(path.contains(config->getMangaDir().absolutePath())) {
+				} if(path.contains(config->getMangaPath())) {
 					root_dir = config->getMangaDir();
 				}
 

@@ -41,10 +41,15 @@ class Config : public QObject {
 		const QString& getBinDir() const;
 		QString getIconPath() const;
 		QDir getRootDir() const;
+		QString getRootPath() const;
 		QDir getThumbDir() const;
+		QString getThumbPath() const;
 		QDir getTempDir() const;
+		QString getTempPath() const;
 		QDir getComicDir() const;
+		QString getComicPath() const;
 		QDir getMangaDir() const;
+		QString getMangaPath() const;
 		bool manageFiles() const;
 		bool groupByPublisher() const;
 		bool isEmpty() const;
