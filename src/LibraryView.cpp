@@ -63,6 +63,32 @@ ReferenceList<ComicFile> LibraryView::getSelectedComics() {
 }
 
 
+/**
+ * Resets scope to top level.
+ */
+void LibraryView::resetScope() {
+	if(config->isComicEnabled()) {
+		model->cur_scope.library = "Comics";
+	} else {
+		model->cur_scope.library = "Manga";
+	}
+
+	if(config->groupByPublisher()) {
+		model->cur_scope.category = model->PUBLISHER_SCOPE;
+		model->cur_scope.publisher.clear();
+	} else {
+		model->cur_scope.category	=	model->SERIES_SCOPE;
+		model->cur_scope.publisher	=	"All";
+	}
+
+	model->cur_scope.series.clear();
+	model->cur_scope.volume.clear();
+	model->cur_scope.user_list.clear();
+
+	refreshModel();
+}
+
+
 void LibraryView::refreshModel() {
 	model->refreshList();
 }

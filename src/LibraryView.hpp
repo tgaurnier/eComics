@@ -42,6 +42,7 @@ class LibraryView : public QListView {
 		static void init(QWidget *parent = 0);
 		static void destroy();
 		ReferenceList<ComicFile> getSelectedComics();
+		void resetScope();
 
 	public slots:
 		void refreshModel();
@@ -65,6 +66,7 @@ class LibraryView : public QListView {
 				void navigateBack();
 				void onItemActivated(const QModelIndex &index);
 				friend ReferenceList<ComicFile> LibraryView::getSelectedComics();
+				friend void LibraryView::resetScope();
 
 			private:
 				/**
