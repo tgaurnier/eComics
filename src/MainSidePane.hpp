@@ -40,6 +40,8 @@ class MainSidePane : public QWidget {
 	public:
 		static void init(QWidget *parent = 0);
 		static void destroy();
+		void refreshLibraries();
+		void refreshLists();
 		void initSelectedList();
 
 		signals:
@@ -52,6 +54,7 @@ class MainSidePane : public QWidget {
 			public:
 				static void init(QWidget *parent);
 				static void destroy();
+				void refresh();
 
 			private:
 				QStringListModel *internal_model;
@@ -67,6 +70,7 @@ class MainSidePane : public QWidget {
 			public:
 				static void init(QWidget *parent);
 				static void destroy();
+				void refresh();
 
 			private:
 				QStringListModel *internal_model;

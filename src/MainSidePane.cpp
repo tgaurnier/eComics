@@ -34,6 +34,16 @@ void MainSidePane::destroy() {
 }
 
 
+void MainSidePane::refreshLibraries() {
+	library_list_view->refresh();
+}
+
+
+void MainSidePane::refreshLists() {
+	user_list_view->refresh();
+}
+
+
 void MainSidePane::initSelectedList() {
 	// Set selected library or list
 	//TODO: SELECT LAST SELECTED LIBRARY OR USER-MADE LIST, FOR NOW JUST SELECT COMICS OR MANGA LIBRARY
@@ -96,6 +106,29 @@ void MainSidePane::LibraryListView::destroy() {
 }
 
 
+/**
+ * Add/remove libraries (Comics and Manga) to/from view as necessary.
+ */
+void MainSidePane::LibraryListView::refresh() {
+	if(config->isComicEnabled() && !internal_model->stringList().contains(tr("Comics"))) {
+		internal_model->insertRow(0);
+		internal_model->setData(internal_model->index(0), tr("Comics"));
+	} else if(!config->isComicEnabled() && internal_model->stringList().contains(tr("Comics"))) {
+		internal_model->removeRow(internal_model->stringList().indexOf("Comics"));
+	}
+
+	if(config->isMangaEnabled() && !internal_model->stringList().contains(tr("Manga"))) {
+		int i = internal_model->rowCount();
+		internal_model->insertRow(i);
+		internal_model->setData(internal_model->index(i), tr("Manga"));
+	} else if(!config->isMangaEnabled() && internal_model->stringList().contains(tr("Manga"))) {
+		internal_model->removeRow(internal_model->stringList().indexOf("Manga"));
+	}
+
+	setFixedHeight((this->sizeHintForRow(0) + 5) * internal_model->rowCount());
+}
+
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *								LIBRARYLISTVIEW PRIVATE METHODS 								 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -106,9 +139,8 @@ MainSidePane::LibraryListView::LibraryListView(QWidget *parent) : QListView(pare
 
 	// Populate model
 	if(config->isComicEnabled()) {
-		int i = internal_model->rowCount();
-		internal_model->insertRow(i);
-		internal_model->setData(internal_model->index(i), tr("Comics"));
+		internal_model->insertRow(0);
+		internal_model->setData(internal_model->index(0), tr("Comics"));
 	}
 	if(config->isMangaEnabled()) {
 		int i = internal_model->rowCount();
@@ -139,13 +171,17 @@ MainSidePane::LibraryListView::~LibraryListView() {
 void MainSidePane::LibraryListView::selectionChanged(const QItemSelection &selected,
 		const QItemSelection &deselected) {
 	user_list_view->clearSelection();
-	if(selected.indexes().at(0).row() == 0 && config->isComicEnabled()) {
-		config->setSelectedList("Library::Comics");
-	} else {
-		config->setSelectedList("Library::Manga");
-	}
 
-	emit ((MainSidePane*)parentWidget())->selectedListChanged(config->getSelectedList());
+	// If there is temporarily nothing selected, avoid segfault
+	if(selected.length() > 0) {
+		if(selected.indexes().at(0).row() == 0 && config->isComicEnabled()) {
+			config->setSelectedList("Library::Comics");
+		} else {
+			config->setSelectedList("Library::Manga");
+		}
+
+		emit ((MainSidePane*)parentWidget())->selectedListChanged(config->getSelectedList());
+	}
 }
 
 
@@ -164,7 +200,14 @@ void MainSidePane::UserListView::init(QWidget *parent) {
 void MainSidePane::UserListView::destroy() {
 	delete user_list_view;
 	user_list_view = nullptr;
+}
 
+
+/**
+ * Add/remove user lists to/from view as necessary.
+ */
+void MainSidePane::UserListView::refresh() {
+	//TODO
 }
 
 
