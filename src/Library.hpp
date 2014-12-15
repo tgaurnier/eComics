@@ -61,6 +61,7 @@ class Library : public QList<ComicFile> {
 		static void destroy();
 		void append(const ComicFile &comic);
 		void append(const QList<ComicFile> &comic_list);
+		void cleanupFiles();
 		QList<ComicFile> getComicsFromPublisher(const QString &publisher) const;
 		QList<ComicFile> getComicsFromSeries(const QString &series,
 			const QString &publisher = 0) const;

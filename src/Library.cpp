@@ -46,6 +46,62 @@ void Library::append(const QList<ComicFile> &comic_list) {
 
 
 /**
+ * Moves files to appropriate directories, deletes all empty directories, then saves everything to
+ * library.
+ */
+void Library::cleanupFiles() {
+	// Move each comic to it's appropriate directory
+	for(ComicFile &comic : *this) comic.move();
+
+	// Scan directories for empty folders and delete them
+	QDirIterator *cur = nullptr;
+
+	// 2x loop, once for comics, another for manga
+	for(int count = 1; count <= 2; count++) {
+		// On first iteration set cur to comic dir if it's enabled, on second do manga
+		switch(count) {
+			case 1:
+				if(config->isComicEnabled()) {
+					cur = new QDirIterator(config->getComicDir(), QDirIterator::Subdirectories);
+				} else {
+					continue;
+				}
+				break;
+
+			case 2:
+				if(config->isMangaEnabled()) {
+					cur = new QDirIterator(config->getMangaDir(), QDirIterator::Subdirectories);
+				} else {
+					goto done_cleaning;
+				}
+		}
+
+		// Loop through current directory iterator getting comics
+		while(cur->hasNext()) {
+			cur->next();
+
+			// If not a dir, skip
+			if(!cur->fileInfo().isDir()) continue;
+
+			QDir cur_dir = cur->fileInfo().dir();
+
+			// If dir is empty, delete it, and any empty parent directories
+			if(cur_dir.entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() == 0) {
+				cur_dir.rmpath(cur_dir.absolutePath());
+			}
+		}
+
+		// Reset cur
+		delete cur;
+		cur = nullptr;
+	}
+
+	done_cleaning:
+		save();
+}
+
+
+/**
  * Return list of comics from publisher.
  */
 QList<ComicFile> Library::getComicsFromPublisher(const QString &publisher) const {
@@ -230,8 +286,9 @@ void Library::push_front(const ComicFile &comic) {
 
 
 int Library::removeAll(const ComicFile &comic) {
-	QList::removeAll(comic);
+	int result = QList::removeAll(comic);
 	save();
+	return result;
 }
 
 
@@ -254,8 +311,9 @@ void Library::removeLast() {
 
 
 bool Library::removeOne(const ComicFile &comic) {
-	QList::removeOne(comic);
+	bool result = QList::removeOne(comic);
 	save();
+	return result;
 }
 
 
