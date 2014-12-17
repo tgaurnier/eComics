@@ -12,6 +12,7 @@
 #include "MainSidePane.hpp"
 #include "MainView.hpp"
 #include "MenuBar.hpp"
+#include "PreferencesDialog.hpp"
 
 
 MainWindow *main_window		=	nullptr;
@@ -111,6 +112,9 @@ MainWindow::MainWindow() {
 
 	// Initialize comic info dialog
 	ComicInfoDialog::init(this);
+
+	// Initialize preferences dialog
+	PreferencesDialog::init(this);
 
 	// Connect signals to actions
 	connect(eComics::actions->quit(), SIGNAL(triggered()), qApp, SLOT(quit()));

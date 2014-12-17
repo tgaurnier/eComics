@@ -48,7 +48,8 @@ MOC_SRC		=	moc/moc_Actions.cpp\
 				moc/moc_MainView.cpp\
 				moc/moc_MainWindow.cpp\
 				moc/moc_MetadataTag.cpp\
-				moc/moc_Page.cpp
+				moc/moc_Page.cpp\
+				moc/moc_PreferencesDialog.cpp
 
 MOC_OBJ		=	$(MOC_SRC:%.cpp=%.o)
 
@@ -75,6 +76,7 @@ OBJECTS		=	obj/Actions.o\
 				obj/Page.o\
 				obj/PageListView.o\
 				obj/Pdf.o\
+				obj/PreferencesDialog.o\
 				obj/ToolBar.o
 
 # Dependency files created by `g++ -MMD -MP`
