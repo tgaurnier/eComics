@@ -37,5 +37,5 @@ void HelpButton::setMessage(const QString &msg) {
 
 
 void HelpButton::onClicked() {
-	QMessageBox::information(this, "Help", msg);
+	QMessageBox::information(this, tr("Help"), msg);
 }
