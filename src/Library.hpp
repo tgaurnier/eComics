@@ -24,6 +24,7 @@
 #include <QDirIterator>
 #include <QDebug>
 
+#include "Actions.hpp"
 #include "ComicInfo.hpp"
 #include "ComicFile.hpp"
 #include "Config.hpp"
@@ -39,7 +40,9 @@
  * keeping a thumbnail cache of all of the covers. The main() portion of the program needs to call
  * 'Library::init()' and 'Library::destroy()'.
  */
-class Library : public QList<ComicFile> {
+class Library : public QObject, public QList<ComicFile> {
+	Q_OBJECT
+
 	public:
 		// Attribute lists for attributes that multiple comics will share
 		QList<QString> series_list;
@@ -61,7 +64,6 @@ class Library : public QList<ComicFile> {
 		static void destroy();
 		void append(const ComicFile &comic);
 		void append(const QList<ComicFile> &comic_list);
-		void cleanupFiles();
 		QList<ComicFile> getComicsFromPublisher(const QString &publisher) const;
 		QList<ComicFile> getComicsFromSeries(const QString &series,
 			const QString &publisher = 0) const;
@@ -86,7 +88,6 @@ class Library : public QList<ComicFile> {
 		void removeLast();
 		bool removeOne(const ComicFile &comic);
 		void replace(int i, const ComicFile &comic);
-		void scanDirectories();
 		void save();
 		void startBatchEditing();
 		void finishBatchEditing();
@@ -102,6 +103,10 @@ class Library : public QList<ComicFile> {
 		const ComicFile & operator[](const QByteArray &md5_hash) const;
 		ComicFile& operator[](const QString &path);
 		const ComicFile & operator[](const QString &path) const;
+
+	public slots:
+		void cleanupFiles();
+		void scanDirectories();
 
 	private:
 		static Library *instance;

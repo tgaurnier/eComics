@@ -40,6 +40,7 @@ MOC_SRC		=	moc/moc_Actions.cpp\
 				moc/moc_ComicInfo.cpp\
 				moc/moc_ComicInfoDialog.cpp\
 				moc/moc_DelimitedCompleter.cpp\
+				moc/moc_Library.cpp\
 				moc/moc_LibraryView.cpp\
 				moc/moc_FilePathEdit.cpp\
 				moc/moc_FirstRunDialog.cpp\
