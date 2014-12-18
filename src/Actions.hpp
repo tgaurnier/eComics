@@ -63,6 +63,7 @@ namespace eComics {
 			QAction * statusbar() const { return statusbar_action; }
 			// Getters for tools actions
 			QAction * scanLibrary() const { return scan_library_action; }
+			QAction * cleanupFiles() const { return cleanup_files_action; }
 			QAction * convert() const { return convert_action; }
 			// Getters for help actions
 			QAction * about() const { return about_action; }
@@ -94,6 +95,7 @@ namespace eComics {
 			QAction *statusbar_action;
 			// Tools actons
 			QAction *scan_library_action;
+			QAction *cleanup_files_action;
 			QAction *convert_action;
 			// Help actions
 			QAction *about_action;
@@ -107,8 +109,10 @@ namespace eComics {
 
 		private slots:
 			void addComicsActivated();
+			void cleanupFilesActivated();
 			void deleteSelectedComics();
 			void removeSelectedComics();
+			void scanLibraryActivated();
 	};
 
 

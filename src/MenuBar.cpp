@@ -60,6 +60,7 @@ MenuBar::MenuBar(QMainWindow *parent) : QObject(parent) {
 
 	// Add tools actions
 	tools_menu->addAction(eComics::actions->scanLibrary());
+	tools_menu->addAction(eComics::actions->cleanupFiles());
 	tools_menu->addAction(eComics::actions->convert());
 
 	// Add help actions

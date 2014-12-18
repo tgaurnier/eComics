@@ -68,8 +68,9 @@ Actions::Actions(QWidget *parent) {
 	statusbar_action	=	new QAction(tr("&Show status bar"), parent);
 
 	// Create tools actions
-	scan_library_action	=	new QAction(tr("&Scan library"), parent);
-	convert_action		=	new QAction(tr("&Convert"), parent);
+	scan_library_action		=	new QAction(tr("&Scan library"), parent);
+	cleanup_files_action	=	new QAction(tr("&Cleanup files"), parent);
+	convert_action			=	new QAction(tr("&Convert"), parent);
 
 	// Create help actions
 	about_action		=	new QAction(tr("&About eComics"), parent);
@@ -82,8 +83,10 @@ Actions::Actions(QWidget *parent) {
 
 	// Connect actions to local slots
 	connect(add_comics_action, SIGNAL(triggered()), this, SLOT(addComicsActivated()));
-	connect(remove_action, SIGNAL(triggered()), this, SLOT(removeSelectedComics()));
+	connect(cleanup_files_action, SIGNAL(triggered()), this, SLOT(cleanupFilesActivated()));
 	connect(delete_action, SIGNAL(triggered()), this, SLOT(deleteSelectedComics()));
+	connect(remove_action, SIGNAL(triggered()), this, SLOT(removeSelectedComics()));
+	connect(scan_library_action, SIGNAL(triggered()), this, SLOT(scanLibraryActivated()));
 
 	// Connect keyboard shortcuts
 	connect(f12_shortcut, SIGNAL(activated()), fullscreen_action, SIGNAL(triggered()));
@@ -111,6 +114,7 @@ Actions::~Actions() {
 
 	// Delete tools actions
 	delete scan_library_action;
+	delete cleanup_files_action;
 	delete convert_action;
 
 	// Delete help actions
@@ -145,6 +149,14 @@ void Actions::addComicsActivated() {
 			library_view->refreshModel();
 		}
 	}
+}
+
+
+/**
+ * Run Library's cleanupFiles() method.
+ */
+void Actions::cleanupFilesActivated() {
+	library->cleanupFiles();
 }
 
 
@@ -234,4 +246,12 @@ void Actions::removeSelectedComics() {
 
 		library_view->refreshModel();
 	}
+}
+
+
+/**
+ * Run Library's scanDirectories() method.
+ */
+void Actions::scanLibraryActivated() {
+	library->scanDirectories();
 }
