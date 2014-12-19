@@ -1,5 +1,12 @@
 #include "Library.hpp"
 
+#include <QErrorMessage>
+#include <QFileDialog>
+
+#include "ConfirmationDialog.hpp"
+#include "LibraryView.hpp"
+#include "MainWindow.hpp"
+
 
 Library *library = nullptr;
 
@@ -42,62 +49,6 @@ void Library::append(const ComicFile &comic) {
 void Library::append(const QList<ComicFile> &comic_list) {
 	QList<ComicFile>::append(comic_list);
 	for(ComicFile comic : comic_list) emit (*this)[comic.getPath()].addedToLibrary();
-}
-
-
-/**
- * Moves files to appropriate directories, deletes all empty directories, then saves everything to
- * library.
- */
-void Library::cleanupFiles() {
-	// Move each comic to it's appropriate directory
-	for(ComicFile &comic : *this) comic.move();
-
-	// Scan directories for empty folders and delete them
-	QDirIterator *cur = nullptr;
-
-	// 2x loop, once for comics, another for manga
-	for(int count = 1; count <= 2; count++) {
-		// On first iteration set cur to comic dir if it's enabled, on second do manga
-		switch(count) {
-			case 1:
-				if(config->isComicEnabled()) {
-					cur = new QDirIterator(config->getComicDir(), QDirIterator::Subdirectories);
-				} else {
-					continue;
-				}
-				break;
-
-			case 2:
-				if(config->isMangaEnabled()) {
-					cur = new QDirIterator(config->getMangaDir(), QDirIterator::Subdirectories);
-				} else {
-					goto done_cleaning;
-				}
-		}
-
-		// Loop through current directory iterator getting comics
-		while(cur->hasNext()) {
-			cur->next();
-
-			// If not a dir, skip
-			if(!cur->fileInfo().isDir()) continue;
-
-			QDir cur_dir = cur->fileInfo().dir();
-
-			// If dir is empty, delete it, and any empty parent directories
-			if(cur_dir.entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() == 0) {
-				cur_dir.rmpath(cur_dir.absolutePath());
-			}
-		}
-
-		// Reset cur
-		delete cur;
-		cur = nullptr;
-	}
-
-	done_cleaning:
-		save();
 }
 
 
@@ -324,86 +275,6 @@ void Library::replace(int i, const ComicFile &comic) {
 
 
 /**
- * Scans Comic and/or Manga directories defined in Config object, adding/removing comics/manga from
- * library as needed. save() will automatically be called after this.
- */
-void Library::scanDirectories() {
-	qDebug() << "Scanning directories for changes...";
-
-	// First scan library for non-existent comics, and remove them
-	for(int i = 0; i < this->size(); i++) {
-		if(!QFile::exists((*this)[i].getPath())) {
-			this->removeAt(i);
-		}
-	}
-
-	// Next scan comic and/or manga directories to add any new comics/manga
-	QDirIterator *cur = nullptr;
-
-	// 2x loop, once for comics, another for manga
-	for(int count = 1; count <= 2; count++) {
-		// On first iteration set cur to comic dir if it's enabled, on second do manga
-		switch(count) {
-			case 1:
-				if(config->isComicEnabled()) {
-					cur = new QDirIterator(config->getComicDir(), QDirIterator::Subdirectories);
-				} else {
-					continue;
-				}
-				break;
-
-			case 2:
-				if(config->isMangaEnabled()) {
-					cur = new QDirIterator(config->getMangaDir(), QDirIterator::Subdirectories);
-				} else {
-					goto done_scanning;
-				}
-		}
-
-		// Loop through current directory iterator getting comics
-		while(cur->hasNext()) {
-			cur->next();
-
-			// If not a file, skip
-			if(!cur->fileInfo().isFile()) continue;
-
-			ComicFile cur_file(cur->filePath());
-
-			// First check if file is valid
-			if(cur_file.isNull()) {
-				continue;
-			}
-
-			// Next check if file at path already exists in library
-			if(this->contains(cur->filePath())) {
-				// If it exists in library, check if it's been modified by comparing the md5 hash
-				if(this->at(cur->filePath()).getMd5Hash() == cur_file.getMd5Hash()) {
-					continue;
-				} else {
-					// If file has been modified, then remove from library to re-add
-					removeAt(indexOf(cur->filePath()));
-				}
-			}
-
-			// Last add it to library and set dirty to true
-			(*this) << cur_file;
-			dirty = true;
-
-			// Update debug log
-			qDebug() << "Added to library:" << cur->filePath() << "\n";
-		}
-
-		// Reset cur
-		delete cur;
-		cur = nullptr;
-	}
-
-	done_scanning:
-		if(dirty) try { save(); } catch(const eComics::Exception &e) { e.printMsg(); }
-}
-
-
-/**
  * Saves all comics/manga in library to library.xml.
  *
  * Possible Exceptions:
@@ -588,6 +459,256 @@ const ComicFile & Library::operator[](const QString &path) const {
 }
 
 
+/**
+ * Open a files select dialog, copy selected comics to comics or manga dir, then add to library.
+ */
+void Library::addComics() {
+	QStringList path_list	=	QFileDialog::getOpenFileNames(
+								main_window,
+								"Select comics to import",
+								QDir::homePath(),
+								"Comic files(*.cb7 *.7z *.cbr *.rar *.cbz *zip *.pdf)");
+
+	for(QString path : path_list) {
+		ComicFile comic(path);
+
+		if(comic.isNull()) {
+			QErrorMessage err_msg(main_window);
+			err_msg.showMessage(QString("Failed to open ") + path);
+		} else {
+			comic.move();
+			this->append(comic);
+			library_view->refreshModel();
+		}
+	}
+}
+
+
+/**
+ * Moves files to appropriate directories, deletes all empty directories, then saves everything to
+ * library.
+ */
+void Library::cleanupFiles() {
+	// Move each comic to it's appropriate directory
+	for(ComicFile &comic : *this) comic.move();
+
+	// Scan directories for empty folders and delete them
+	QDirIterator *cur = nullptr;
+
+	// 2x loop, once for comics, another for manga
+	for(int count = 1; count <= 2; count++) {
+		// On first iteration set cur to comic dir if it's enabled, on second do manga
+		switch(count) {
+			case 1:
+				if(config->isComicEnabled()) {
+					cur = new QDirIterator(config->getComicDir(), QDirIterator::Subdirectories);
+				} else {
+					continue;
+				}
+				break;
+
+			case 2:
+				if(config->isMangaEnabled()) {
+					cur = new QDirIterator(config->getMangaDir(), QDirIterator::Subdirectories);
+				} else {
+					goto done_cleaning;
+				}
+		}
+
+		// Loop through current directory iterator getting comics
+		while(cur->hasNext()) {
+			cur->next();
+
+			// If not a dir, skip
+			if(!cur->fileInfo().isDir()) continue;
+
+			QDir cur_dir = cur->fileInfo().dir();
+
+			// If dir is empty, delete it, and any empty parent directories
+			if(cur_dir.entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() == 0) {
+				cur_dir.rmpath(cur_dir.absolutePath());
+			}
+		}
+
+		// Reset cur
+		delete cur;
+		cur = nullptr;
+	}
+
+	done_cleaning:
+		save();
+}
+
+
+/**
+ * Deletes selected comics from library and disk.
+ */
+void Library::deleteSelectedComics() {
+	ReferenceList<ComicFile> selected_list = library_view->getSelectedComics();
+
+	if(selected_list.isEmpty()) {
+		qDebug() << "Logic error: 'Delete' should be grayed out if no comics selected.";
+		return;
+	}
+
+	QString title	=	"Confirm delete";
+	QString msg		=	"Are you sure you want to delete ";
+	msg += (
+		(selected_list.size() > 1) ? QString::number(selected_list.size()) + " comics?" :
+		selected_list[0].getPath() + "?"
+	);
+	msg += "\n\nCan not be undone!";
+
+	if(ConfirmationDialog::exec(title, msg, main_window)) {
+		for(ComicFile comic : selected_list) {
+			QString path = comic.getPath().mid(0, comic.getPath().lastIndexOf("/"));
+			this->removeOne(comic);
+			comic.remove();
+
+			// Remove folders if empty
+			if(QDir(path).entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() == 0) {
+				QDir root_dir;
+				if(path.contains(config->getComicPath())) {
+					root_dir = config->getComicDir();
+				} if(path.contains(config->getMangaPath())) {
+					root_dir = config->getMangaDir();
+				}
+
+				root_dir.rmpath(path);
+			}
+		}
+
+		library_view->refreshModel();
+	}
+}
+
+
+/**
+ * Removes selected comics from library, and moves files to desktop.
+ */
+void Library::removeSelectedComics() {
+	ReferenceList<ComicFile> selected_list = library_view->getSelectedComics();
+
+	if(selected_list.isEmpty()) {
+		qDebug() << "Logic error: 'Delete' should be grayed out if no comics selected.";
+		return;
+	}
+
+	QString title	=	"Confirm remove";
+	QString msg		=	"Are you sure you want to remove ";
+	msg += (
+		(selected_list.size() > 1) ? QString::number(selected_list.size())+" comics from library?" :
+		selected_list[0].getPath() + " from library?"
+	);
+	msg += "\n\nFile(s) will be moved to desktop.";
+
+	if(ConfirmationDialog::exec(title, msg, main_window)) {
+		for(ComicFile comic : selected_list) {
+			QString path = comic.getPath().mid(0, comic.getPath().lastIndexOf("/"));
+			QString name = comic.getPath().mid(comic.getPath().lastIndexOf("/") + 1);
+			this->removeOne(comic);
+
+			// Move to desktop
+			QDir("/").rename(comic.getPath(), QDir::homePath() + "/Desktop/" + name);
+
+			// Remove folders if empty
+			if(QDir(path).entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() == 0) {
+				QDir root_dir;
+				if(path.contains(config->getComicPath())) {
+					root_dir = config->getComicDir();
+				} if(path.contains(config->getMangaPath())) {
+					root_dir = config->getMangaDir();
+				}
+
+				root_dir.rmpath(path);
+			}
+		}
+
+		library_view->refreshModel();
+	}
+}
+
+
+/**
+ * Scans Comic and/or Manga directories defined in Config object, adding/removing comics/manga from
+ * library as needed. save() will automatically be called after this.
+ */
+void Library::scanDirectories() {
+	qDebug() << "Scanning directories for changes...";
+
+	// First scan library for non-existent comics, and remove them
+	for(int i = 0; i < this->size(); i++) {
+		if(!QFile::exists((*this)[i].getPath())) {
+			this->removeAt(i);
+		}
+	}
+
+	// Next scan comic and/or manga directories to add any new comics/manga
+	QDirIterator *cur = nullptr;
+
+	// 2x loop, once for comics, another for manga
+	for(int count = 1; count <= 2; count++) {
+		// On first iteration set cur to comic dir if it's enabled, on second do manga
+		switch(count) {
+			case 1:
+				if(config->isComicEnabled()) {
+					cur = new QDirIterator(config->getComicDir(), QDirIterator::Subdirectories);
+				} else {
+					continue;
+				}
+				break;
+
+			case 2:
+				if(config->isMangaEnabled()) {
+					cur = new QDirIterator(config->getMangaDir(), QDirIterator::Subdirectories);
+				} else {
+					goto done_scanning;
+				}
+		}
+
+		// Loop through current directory iterator getting comics
+		while(cur->hasNext()) {
+			cur->next();
+
+			// If not a file, skip
+			if(!cur->fileInfo().isFile()) continue;
+
+			ComicFile cur_file(cur->filePath());
+
+			// First check if file is valid
+			if(cur_file.isNull()) {
+				continue;
+			}
+
+			// Next check if file at path already exists in library
+			if(this->contains(cur->filePath())) {
+				// If it exists in library, check if it's been modified by comparing the md5 hash
+				if(this->at(cur->filePath()).getMd5Hash() == cur_file.getMd5Hash()) {
+					continue;
+				} else {
+					// If file has been modified, then remove from library to re-add
+					removeAt(indexOf(cur->filePath()));
+				}
+			}
+
+			// Last add it to library and set dirty to true
+			(*this) << cur_file;
+			dirty = true;
+
+			// Update debug log
+			qDebug() << "Added to library:" << cur->filePath() << "\n";
+		}
+
+		// Reset cur
+		delete cur;
+		cur = nullptr;
+	}
+
+	done_scanning:
+		if(dirty) try { save(); } catch(const eComics::Exception &e) { e.printMsg(); }
+}
+
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *									LIBRARY PRIVATE METHODS 									 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -599,6 +720,14 @@ Library::Library() {
 
 	// Initialize file pointer
 	file = new QFile(config->getRootDir().absolutePath() + "/library.xml");
+
+	// Connect actions
+	eComics::Actions *actions = eComics::actions;
+	connect(actions->addComics(), SIGNAL(triggered()), this, SLOT(addComics()));
+	connect(actions->cleanupFiles(), SIGNAL(triggered()), this, SLOT(cleanupFiles()));
+	connect(actions->deleteFile(), SIGNAL(triggered()), this, SLOT(deleteSelectedComics()));
+	connect(actions->remove(), SIGNAL(triggered()), this, SLOT(removeSelectedComics()));
+	connect(actions->scanLibrary(), SIGNAL(triggered()), this, SLOT(scanDirectories()));
 }
 
 

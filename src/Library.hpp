@@ -105,8 +105,11 @@ class Library : public QObject, public QList<ComicFile> {
 		const ComicFile & operator[](const QString &path) const;
 
 	public slots:
+		void addComics();
 		void cleanupFiles();
+		void deleteSelectedComics();
 		void scanDirectories();
+		void removeSelectedComics();
 
 	private:
 		static Library *instance;

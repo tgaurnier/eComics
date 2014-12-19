@@ -106,13 +106,6 @@ namespace eComics {
 
 			Actions(QWidget *parent);
 			~Actions();
-
-		private slots:
-			void addComicsActivated();
-			void cleanupFilesActivated();
-			void deleteSelectedComics();
-			void removeSelectedComics();
-			void scanLibraryActivated();
 	};
 
 

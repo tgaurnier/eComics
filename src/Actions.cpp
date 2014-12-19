@@ -1,17 +1,8 @@
 #include "Actions.hpp"
 
 #include <QApplication>
-#include <QDir>
-#include <QErrorMessage>
-#include <QFileDialog>
 #include <QShortcut>
 #include <QStyle>
-
-#include "ComicFile.hpp"
-#include "ConfirmationDialog.hpp"
-#include "Library.hpp"
-#include "LibraryView.hpp"
-#include "MainWindow.hpp"
 
 
 using namespace eComics;
@@ -81,13 +72,6 @@ Actions::Actions(QWidget *parent) {
 	navigate_back_action	=	new QAction(style->standardIcon(QStyle::SP_ArrowLeft), tr("&Back"),
 								parent);
 
-	// Connect actions to local slots
-	connect(add_comics_action, SIGNAL(triggered()), this, SLOT(addComicsActivated()));
-	connect(cleanup_files_action, SIGNAL(triggered()), this, SLOT(cleanupFilesActivated()));
-	connect(delete_action, SIGNAL(triggered()), this, SLOT(deleteSelectedComics()));
-	connect(remove_action, SIGNAL(triggered()), this, SLOT(removeSelectedComics()));
-	connect(scan_library_action, SIGNAL(triggered()), this, SLOT(scanLibraryActivated()));
-
 	// Connect keyboard shortcuts
 	connect(f12_shortcut, SIGNAL(activated()), fullscreen_action, SIGNAL(triggered()));
 }
@@ -124,134 +108,4 @@ Actions::~Actions() {
 
 	// Delete library navigation actions
 	delete navigate_back_action;
-}
-
-
-/**
- * Open a files select dialog, copy selected comics to comics or manga dir, then add to library.
- */
-void Actions::addComicsActivated() {
-	QStringList path_list	=	QFileDialog::getOpenFileNames(
-								main_window,
-								"Select comics to import",
-								QDir::homePath(),
-								"Comic files(*.cb7 *.7z *.cbr *.rar *.cbz *zip *.pdf)");
-
-	for(QString path : path_list) {
-		ComicFile comic(path);
-
-		if(comic.isNull()) {
-			QErrorMessage err_msg(main_window);
-			err_msg.showMessage(QString("Failed to open ") + path);
-		} else {
-			comic.move();
-			library->append(comic);
-			library_view->refreshModel();
-		}
-	}
-}
-
-
-/**
- * Run Library's cleanupFiles() method.
- */
-void Actions::cleanupFilesActivated() {
-	library->cleanupFiles();
-}
-
-
-/**
- * Deletes selected comics from library and disk.
- */
-void Actions::deleteSelectedComics() {
-	ReferenceList<ComicFile> selected_list = library_view->getSelectedComics();
-
-	if(selected_list.isEmpty()) {
-		qDebug() << "Logic error: 'Delete' should be grayed out if no comics selected.";
-		return;
-	}
-
-	QString title	=	"Confirm delete";
-	QString msg		=	"Are you sure you want to delete ";
-	msg += (
-		(selected_list.size() > 1) ? QString::number(selected_list.size()) + " comics?" :
-		selected_list[0].getPath() + "?"
-	);
-	msg += "\n\nCan not be undone!";
-
-	if(ConfirmationDialog::exec(title, msg, main_window)) {
-		for(ComicFile comic : selected_list) {
-			QString path = comic.getPath().mid(0, comic.getPath().lastIndexOf("/"));
-			library->removeOne(comic);
-			comic.remove();
-
-			// Remove folders if empty
-			if(QDir(path).entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() == 0) {
-				QDir root_dir;
-				if(path.contains(config->getComicPath())) {
-					root_dir = config->getComicDir();
-				} if(path.contains(config->getMangaPath())) {
-					root_dir = config->getMangaDir();
-				}
-
-				root_dir.rmpath(path);
-			}
-		}
-
-		library_view->refreshModel();
-	}
-}
-
-
-/**
- * Removes selected comics from library, and moves files to desktop.
- */
-void Actions::removeSelectedComics() {
-	ReferenceList<ComicFile> selected_list = library_view->getSelectedComics();
-
-	if(selected_list.isEmpty()) {
-		qDebug() << "Logic error: 'Delete' should be grayed out if no comics selected.";
-		return;
-	}
-
-	QString title	=	"Confirm remove";
-	QString msg		=	"Are you sure you want to remove ";
-	msg += (
-		(selected_list.size() > 1) ? QString::number(selected_list.size())+" comics from library?" :
-		selected_list[0].getPath() + " from library?"
-	);
-	msg += "\n\nFile(s) will be moved to desktop.";
-
-	if(ConfirmationDialog::exec(title, msg, main_window)) {
-		for(ComicFile comic : selected_list) {
-			QString path = comic.getPath().mid(0, comic.getPath().lastIndexOf("/"));
-			QString name = comic.getPath().mid(comic.getPath().lastIndexOf("/") + 1);
-			library->removeOne(comic);
-
-			// Move to desktop
-			QDir("/").rename(comic.getPath(), QDir::homePath() + "/Desktop/" + name);
-
-			// Remove folders if empty
-			if(QDir(path).entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() == 0) {
-				QDir root_dir;
-				if(path.contains(config->getComicPath())) {
-					root_dir = config->getComicDir();
-				} if(path.contains(config->getMangaPath())) {
-					root_dir = config->getMangaDir();
-				}
-
-				root_dir.rmpath(path);
-			}
-		}
-
-		library_view->refreshModel();
-	}
-}
-
-
-/**
- * Run Library's scanDirectories() method.
- */
-void Actions::scanLibraryActivated() {
-	library->scanDirectories();
 }

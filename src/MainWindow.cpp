@@ -87,11 +87,11 @@ MainWindow::MainWindow() {
 		}
 	}
 
-	// Initialize library right after Config is finished, but before everything else
-	Library::init();
-
 	// Initialize global actions
 	eComics::Actions::init(this);
+
+	// Initialize library right after Config and Actions are finished, but before everything else
+	Library::init();
 
 	// Initialize child widgets
 	status_bar		=	statusBar();
