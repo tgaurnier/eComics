@@ -1,6 +1,7 @@
 #include "MainWindow.hpp"
 
 #include <QApplication>
+#include <QSettings>
 #include <QSplitter>
 #include <QStatusBar>
 
@@ -18,6 +19,7 @@
 MainWindow *main_window		=	nullptr;
 bool MainWindow::exiting	=	false;
 
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *									MAINWINDOW PUBLIC METHODS 									 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -30,12 +32,14 @@ bool MainWindow::exiting	=	false;
 bool MainWindow::init() {
 	if(main_window == nullptr) {
 		main_window = new MainWindow;
+		// If exited before first run dialog is finished.
 		if(exiting) {
 			MainWindow::destroy();
 			return false;
 		}
 	}
 
+	main_window->restoreSettings();
 	return true;
 }
 
@@ -131,6 +135,27 @@ MainWindow::~MainWindow() {
 
 	// Delete all other malloced objects
 	if(main_splitter != nullptr) delete main_splitter;
+}
+
+
+/**
+ * On close save Window state and geometry.
+ */
+void MainWindow::closeEvent(QCloseEvent *event) {
+	QSettings settings("ToryGaurnier", "eComics");
+	settings.setValue("geometry", saveGeometry());
+	settings.setValue("windowState", saveState());
+	QMainWindow::closeEvent(event);
+}
+
+
+/**
+ * Restore settings.
+ */
+void MainWindow::restoreSettings() {
+	QSettings settings("ToryGaurnier", "eComics");
+	restoreGeometry(settings.value("geometry").toByteArray());
+	restoreState(settings.value("windowState").toByteArray());
 }
 
 

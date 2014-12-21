@@ -72,6 +72,9 @@ class MainWindow : public QMainWindow {
 
 		MainWindow();
 		~MainWindow();
+		void closeEvent(QCloseEvent *event);
+		void restoreSettings();
+
 	private slots:
 		void toggleFullscreen();
 };
