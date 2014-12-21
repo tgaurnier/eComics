@@ -145,6 +145,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 	QSettings settings("ToryGaurnier", "eComics");
 	settings.setValue("geometry", saveGeometry());
 	settings.setValue("windowState", saveState());
+	settings.setValue("mainSplitterState", main_splitter->saveState());
 	QMainWindow::closeEvent(event);
 }
 
@@ -156,6 +157,7 @@ void MainWindow::restoreSettings() {
 	QSettings settings("ToryGaurnier", "eComics");
 	restoreGeometry(settings.value("geometry").toByteArray());
 	restoreState(settings.value("windowState").toByteArray());
+	main_splitter->restoreState(settings.value("mainSplitterState").toByteArray());
 }
 
 
