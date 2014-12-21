@@ -43,6 +43,8 @@ void ToolBar::enableBackButton() {
 
 
 ToolBar::ToolBar(const QString &title, QWidget *parent) : QToolBar(title, parent) {
+	setObjectName("ToolBar");
+
 	// Disable back button on first load
 	disableBackButton();
 }
