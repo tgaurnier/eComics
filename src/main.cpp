@@ -41,9 +41,11 @@ int main(int argc, char **argv) {
 
 	if(config->isFullscreen()) main_window->showFullScreen();
 	else main_window->show();
-	return app.exec();
+	int result = app.exec();
 
 	Library::destroy();
 	Config::destroy();
 	MainWindow::destroy();
+
+	return result;
 }
