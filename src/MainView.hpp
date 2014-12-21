@@ -68,6 +68,8 @@ class MainView : public QMainWindow {
 	private:
 		MainView(QWidget *parent);
 		~MainView();
+		void saveSettings();
+		void restoreSettings();
 };
 
 

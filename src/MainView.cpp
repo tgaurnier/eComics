@@ -1,6 +1,7 @@
 #include "MainView.hpp"
 
 #include <QDebug>
+#include <QSettings>
 
 #include "Actions.hpp"
 #include "LibraryView.hpp"
@@ -43,10 +44,33 @@ MainView::MainView(QWidget *parent) : QMainWindow(parent) {
 
 	// Set QMainWindow to a widget instead of top level window
 	setWindowFlags(Qt::Widget);
+
+	// Restore widget settings
+	restoreSettings();
 }
 
 
 MainView::~MainView() {
+	saveSettings();
+
 	ToolBar::destroy();
 	LibraryView::destroy();
+}
+
+
+/**
+ * Save widget settings.
+ */
+void MainView::saveSettings() {
+	QSettings settings("ToryGaurnier", "eComics");
+	settings.setValue("mainViewState", saveState());
+}
+
+
+/**
+ * Restore widget settings.
+ */
+void MainView::restoreSettings() {
+	QSettings settings("ToryGaurnier", "eComics");
+	restoreState(settings.value("mainViewState").toByteArray());
 }
