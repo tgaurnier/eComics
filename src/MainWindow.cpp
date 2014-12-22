@@ -100,9 +100,9 @@ MainWindow::MainWindow() {
 	// Initialize child widgets
 	status_bar		=	statusBar();
 	main_splitter	=	new QSplitter(this);
-	MenuBar::init(this);
 	MainSidePane::init(main_splitter);
 	MainView::init(main_splitter); // Must be initialized after MainSidePane
+	MenuBar::init(this);
 	main_side_pane->initSelectedList(); // Must happen after MainView is initialized
 
 	// Add widgets to window
