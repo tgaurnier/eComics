@@ -121,10 +121,10 @@ MainWindow::MainWindow() {
 	PreferencesDialog::init(this);
 
 	// Connect signals to actions
-	connect(eComics::actions->statusbar(), SIGNAL(toggled(bool)), this,
+	connect(eComics::actions->statusBar(), SIGNAL(toggled(bool)), this,
 			SLOT(toggleStatusBar(bool)));
 	connect(eComics::actions->quit(), SIGNAL(triggered()), qApp, SLOT(quit()));
-	connect(eComics::actions->fullscreen(), SIGNAL(triggered()), this, SLOT(toggleFullscreen()));
+	connect(eComics::actions->fullScreen(), SIGNAL(triggered()), this, SLOT(toggleFullscreen()));
 }
 
 
@@ -173,22 +173,20 @@ void MainWindow::restoreSettings() {
 
 	// Restore status bar visibility
 	if(settings.contains("StatusBar.Visible")) {
-		eComics::actions->statusbar()->setChecked(settings.value("StatusBar.Visible").toBool());
+		eComics::actions->statusBar()->setChecked(settings.value("StatusBar.Visible").toBool());
 		status_bar->setVisible(settings.value("StatusBar.Visible").toBool());
 	} else {
-		eComics::actions->statusbar()->setChecked(true);
+		eComics::actions->statusBar()->setChecked(true);
 		status_bar->setVisible(true);
 	}
 }
 
 
 void MainWindow::toggleFullscreen() {
-	if(config->isFullscreen()) {
+	if(windowState() == Qt::WindowFullScreen) {
 		showNormal();
-		config->setFullscreen(false);
 	} else {
 		showFullScreen();
-		config->setFullscreen(true);
 	}
 }
 

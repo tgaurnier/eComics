@@ -38,7 +38,7 @@ namespace eComics {
 	 *
 	 * A singleton object, which contains all of the global actions in the application, these
 	 * actions can be used in anything from the menu bar, to right click menus. Most of these
-	 * actions are connected in other classes (for example, fullscreen_action is connected in
+	 * actions are connected in other classes (for example, full_screen_action is connected in
 	 * MainWindow.cpp), only certain actions are connected to 'local' slots (such as
 	 * add_comics_action is connected).
 	 */
@@ -58,10 +58,10 @@ namespace eComics {
 			QAction * deleteFile() const { return delete_action; }
 			QAction * preferences() const { return preferences_action; }
 			// Getters for view actions
-			QAction * fullscreen() const { return fullscreen_action; }
+			QAction * fullScreen() const { return full_screen_action; }
 			QAction * toolBar() const { return tool_bar_action; }
 			QAction * sidePane() const { return side_pane_action; }
-			QAction * statusbar() const { return statusbar_action; }
+			QAction * statusBar() const { return status_bar_action; }
 			// Getters for tools actions
 			QAction * scanLibrary() const { return scan_library_action; }
 			QAction * cleanupFiles() const { return cleanup_files_action; }
@@ -92,10 +92,10 @@ namespace eComics {
 			QAction *delete_action; // Removes from library and moves file(s) to trash
 			QAction *preferences_action;
 			// View actions
-			QAction *fullscreen_action;
+			QAction *full_screen_action;
 			QAction *tool_bar_action;
 			QAction *side_pane_action;
-			QAction *statusbar_action;
+			QAction *status_bar_action;
 			// Tools actons
 			QAction *scan_library_action;
 			QAction *cleanup_files_action;

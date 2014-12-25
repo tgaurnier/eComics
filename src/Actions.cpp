@@ -63,9 +63,9 @@ Actions::Actions(QWidget *parent) {
 	preferences_action	=	new QAction(tr("&Preferences"), parent);
 
 	// Create view actions
-	fullscreen_action	=	new QAction(tr("&Full Screen"), parent);
+	full_screen_action	=	new QAction(tr("&Full Screen"), parent);
 	side_pane_action	=	new QAction(tr("Show side pane"), parent);
-	statusbar_action	=	new QAction(tr("Show status bar"), parent);
+	status_bar_action	=	new QAction(tr("Show status bar"), parent);
 
 	// Create tools actions
 	scan_library_action		=	new QAction(tr("&Scan library"), parent);
@@ -82,10 +82,10 @@ Actions::Actions(QWidget *parent) {
 								parent);
 
 	side_pane_action->setCheckable(true);
-	statusbar_action->setCheckable(true);
+	status_bar_action->setCheckable(true);
 
 	// Connect keyboard shortcuts
-	connect(f12_shortcut, SIGNAL(activated()), fullscreen_action, SIGNAL(triggered()));
+	connect(f12_shortcut, SIGNAL(activated()), full_screen_action, SIGNAL(triggered()));
 }
 
 
@@ -104,9 +104,9 @@ Actions::~Actions() {
 	delete preferences_action;
 
 	// Delete view actions
-	delete fullscreen_action;
+	delete full_screen_action;
 	delete side_pane_action;
-	delete statusbar_action;
+	delete status_bar_action;
 
 	// Delete tools actions
 	delete scan_library_action;

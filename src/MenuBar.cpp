@@ -54,10 +54,10 @@ MenuBar::MenuBar(QMainWindow *parent) : QObject(parent) {
 	edit_menu->addAction(eComics::actions->preferences());
 
 	// Add view actions
-	view_menu->addAction(eComics::actions->fullscreen());
+	view_menu->addAction(eComics::actions->fullScreen());
 	view_menu->addAction(eComics::actions->toolBar());
 	view_menu->addAction(eComics::actions->sidePane());
-	view_menu->addAction(eComics::actions->statusbar());
+	view_menu->addAction(eComics::actions->statusBar());
 
 	// Add tools actions
 	tools_menu->addAction(eComics::actions->scanLibrary());
