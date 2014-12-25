@@ -50,32 +50,32 @@ Actions::Actions(QWidget *parent) {
 
 	// Create file actions
 	open_action			=	new QAction(tr("&Open"), parent);
-	new_list_action		=	new QAction(tr("&New list"), parent);
-	add_comics_action	=	new QAction(tr("&Add comics"), parent);
+	new_list_action		=	new QAction(tr("&New List"), parent);
+	add_comics_action	=	new QAction(tr("&Add Comics"), parent);
 	quit_action			=	new QAction(tr("&Quit"), parent);
 
 	// Create edit actions
-	add_to_list_action	=	new QAction(tr("&Add to list"), parent);
+	add_to_list_action	=	new QAction(tr("&Add to List"), parent);
 	info_action			=	new QAction(style->standardIcon(QStyle::SP_FileDialogDetailedView),
 							tr("&Info"), parent);
-	remove_action		=	new QAction(tr("Remove from library"), parent);
-	delete_action		=	new QAction(tr("Delete from disk"), parent);
+	remove_action		=	new QAction(tr("Remove from Library"), parent);
+	delete_action		=	new QAction(tr("Delete from Disk"), parent);
 	preferences_action	=	new QAction(tr("&Preferences"), parent);
 
 	// Create view actions
 	full_screen_action	=	new QAction(tr("&Full Screen"), parent);
-	side_pane_action	=	new QAction(tr("Show side pane"), parent);
-	status_bar_action	=	new QAction(tr("Show status bar"), parent);
+	side_pane_action	=	new QAction(tr("Show Side Pane"), parent);
+	status_bar_action	=	new QAction(tr("Show Status Bar"), parent);
 
 	// Create tools actions
-	scan_library_action		=	new QAction(tr("&Scan library"), parent);
-	cleanup_files_action	=	new QAction(tr("&Cleanup files"), parent);
+	scan_library_action		=	new QAction(tr("&Scan Library"), parent);
+	cleanup_files_action	=	new QAction(tr("&Cleanup Files"), parent);
 	convert_action			=	new QAction(tr("&Convert"), parent);
 
 	// Create help actions
 	about_action		=	new QAction(tr("&About eComics"), parent);
 	faq_action			=	new QAction(tr("&FAQ"), parent);
-	report_bug_action	=	new QAction(tr("&Report bugs"), parent);
+	report_bug_action	=	new QAction(tr("&Report Bugs"), parent);
 
 	// Create library navigation actions
 	navigate_back_action	=	new QAction(style->standardIcon(QStyle::SP_ArrowLeft), tr("&Back"),
