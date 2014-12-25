@@ -124,7 +124,8 @@ MainWindow::MainWindow() {
 	connect(eComics::actions->statusBar(), SIGNAL(toggled(bool)), this,
 			SLOT(toggleStatusBar(bool)));
 	connect(eComics::actions->quit(), SIGNAL(triggered()), qApp, SLOT(quit()));
-	connect(eComics::actions->fullScreen(), SIGNAL(triggered()), this, SLOT(toggleFullscreen()));
+	connect(eComics::actions->fullScreen(), SIGNAL(toggled(bool)), this,
+			SLOT(toggleFullscreen(bool)));
 }
 
 
@@ -165,6 +166,7 @@ void MainWindow::restoreSettings() {
 
 	if(settings.contains("MainWindow.State")) {
 		restoreState(settings.value("MainWindow.State").toByteArray());
+		if(windowState() == Qt::WindowFullScreen) eComics::actions->fullScreen()->setChecked(true);
 	}
 
 	if(settings.contains("MainSplitter.State")) {
@@ -182,12 +184,9 @@ void MainWindow::restoreSettings() {
 }
 
 
-void MainWindow::toggleFullscreen() {
-	if(windowState() == Qt::WindowFullScreen) {
-		showNormal();
-	} else {
-		showFullScreen();
-	}
+void MainWindow::toggleFullscreen(bool full_screen) {
+	if(full_screen) showFullScreen();
+	else showNormal();
 }
 
 

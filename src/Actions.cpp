@@ -81,11 +81,12 @@ Actions::Actions(QWidget *parent) {
 	navigate_back_action	=	new QAction(style->standardIcon(QStyle::SP_ArrowLeft), tr("&Back"),
 								parent);
 
+	full_screen_action->setCheckable(true);
 	side_pane_action->setCheckable(true);
 	status_bar_action->setCheckable(true);
 
 	// Connect keyboard shortcuts
-	connect(f12_shortcut, SIGNAL(activated()), full_screen_action, SIGNAL(triggered()));
+	connect(f12_shortcut, SIGNAL(activated()), full_screen_action, SLOT(toggle()));
 }
 
 

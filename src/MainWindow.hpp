@@ -76,7 +76,7 @@ class MainWindow : public QMainWindow {
 		void restoreSettings();
 
 	private slots:
-		void toggleFullscreen();
+		void toggleFullscreen(bool full_screen);
 		void toggleStatusBar(bool visible);
 };
 
