@@ -53,11 +53,9 @@ class Config : public QObject {
 		bool manageFiles() const;
 		bool groupByPublisher() const;
 		bool isEmpty() const;
-		bool isFullscreen() const;
 		bool isComicEnabled() const;
 		bool isMangaEnabled() const;
 		QString getSelectedList() const;
-		void setFullscreen(const bool val);
 		void setThumbDir(const QString &path);
 		void setTempDir(const QString &path);
 		void setComicDir(const QString &path);
@@ -75,7 +73,6 @@ class Config : public QObject {
 		QDir root_dir;
 		QDir thumb_dir;
 		QDir temp_dir;
-		bool fullscreen; // Is window in fullscreen mode?
 		bool manage_files; // Should eComics rename/move files when necessary?
 		bool group_by_publisher; // Should root level of library be grouped by publisher?
 		bool comic_enabled; // Is comic enabled? (either comic, manga, or both must be enabled)

@@ -39,8 +39,7 @@ int main(int argc, char **argv) {
 	// Initialize main window
 	if(!MainWindow::init()) return 0;
 
-	if(config->isFullscreen()) main_window->showFullScreen();
-	else main_window->show();
+	main_window->show();
 	int result = app.exec();
 
 	Library::destroy();

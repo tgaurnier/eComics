@@ -59,7 +59,6 @@ void Config::save() {
 	if(manga_enabled) {
 		buff += QByteArray("manga_dir = ") + manga_dir.absolutePath() + "\n";
 	}
-	buff += "fullscreen = " + QByteArray::number(fullscreen) + "\n";
 
 	// Write buffer to file
 	if(file->write(buff) == -1) {
@@ -88,7 +87,6 @@ QDir Config::getMangaDir() const { return manga_dir; }
 QString Config::getMangaPath() const { return manga_dir.absolutePath(); }
 bool Config::manageFiles() const { return manage_files; }
 bool Config::groupByPublisher() const { return group_by_publisher; }
-bool Config::isFullscreen() const { return fullscreen; }
 bool Config::isEmpty() const { return empty; }
 bool Config::isComicEnabled() const { return comic_enabled; }
 bool Config::isMangaEnabled() const { return manga_enabled; }
@@ -100,7 +98,6 @@ QString Config::getSelectedList() const { return selected_list; }
  *
  * Possible exceptions: Dir setters may throw a eComics::DIR_ERROR().
  */
-void Config::setFullscreen(const bool val) { fullscreen = val; }
 void Config::setTempDir(const QString &path) { setDir(temp_dir, path); }
 void Config::setThumbDir(const QString &path) { setDir(thumb_dir, path); }
 void Config::setComicDir(const QString &path) { setDir(comic_dir, path); }
@@ -241,9 +238,6 @@ void Config::loadFromFile() {
 		}
 		else if(tok[0] == "manga_dir") {
 			setMangaDir(value);
-		}
-		else if(tok[0] == "fullscreen") {
-			setFullscreen(value.toInt());
 		}
 	}
 
