@@ -59,6 +59,7 @@ namespace eComics {
 			QAction * preferences() const { return preferences_action; }
 			// Getters for view actions
 			QAction * fullscreen() const { return fullscreen_action; }
+			QAction * toolBar() const { return tool_bar_action; }
 			QAction * sidePane() const { return side_pane_action; }
 			QAction * statusbar() const { return statusbar_action; }
 			// Getters for tools actions
@@ -74,6 +75,7 @@ namespace eComics {
 
 			static void init(QWidget *parent = 0);
 			static void destroy();
+			void setToolBarAction(QAction *action);
 
 		private:
 			QShortcut *f12_shortcut;
@@ -91,6 +93,7 @@ namespace eComics {
 			QAction *preferences_action;
 			// View actions
 			QAction *fullscreen_action;
+			QAction *tool_bar_action;
 			QAction *side_pane_action;
 			QAction *statusbar_action;
 			// Tools actons

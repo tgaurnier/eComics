@@ -63,7 +63,7 @@ MainView::~MainView() {
  */
 void MainView::saveSettings() {
 	QSettings settings("ToryGaurnier", "eComics");
-	settings.setValue("mainViewState", saveState());
+	settings.setValue("MainView.State", saveState());
 }
 
 
@@ -72,5 +72,8 @@ void MainView::saveSettings() {
  */
 void MainView::restoreSettings() {
 	QSettings settings("ToryGaurnier", "eComics");
-	restoreState(settings.value("mainViewState").toByteArray());
+
+	if(settings.contains("MainView.State")) {
+		restoreState(settings.value("MainView.State").toByteArray());
+	}
 }

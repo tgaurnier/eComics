@@ -121,6 +121,8 @@ MainWindow::MainWindow() {
 	PreferencesDialog::init(this);
 
 	// Connect signals to actions
+	connect(eComics::actions->statusbar(), SIGNAL(toggled(bool)), this,
+			SLOT(toggleStatusBar(bool)));
 	connect(eComics::actions->quit(), SIGNAL(triggered()), qApp, SLOT(quit()));
 	connect(eComics::actions->fullscreen(), SIGNAL(triggered()), this, SLOT(toggleFullscreen()));
 }
@@ -143,9 +145,10 @@ MainWindow::~MainWindow() {
  */
 void MainWindow::closeEvent(QCloseEvent *event) {
 	QSettings settings("ToryGaurnier", "eComics");
-	settings.setValue("geometry", saveGeometry());
-	settings.setValue("windowState", saveState());
-	settings.setValue("mainSplitterState", main_splitter->saveState());
+	settings.setValue("MainWindow.Geometry", saveGeometry());
+	settings.setValue("MainWindow.State", saveState());
+	settings.setValue("MainSplitter.State", main_splitter->saveState());
+	settings.setValue("StatusBar.Visible", status_bar->isVisible());
 	QMainWindow::closeEvent(event);
 }
 
@@ -155,9 +158,27 @@ void MainWindow::closeEvent(QCloseEvent *event) {
  */
 void MainWindow::restoreSettings() {
 	QSettings settings("ToryGaurnier", "eComics");
-	restoreGeometry(settings.value("geometry").toByteArray());
-	restoreState(settings.value("windowState").toByteArray());
-	main_splitter->restoreState(settings.value("mainSplitterState").toByteArray());
+
+	if(settings.contains("MainWindow.Geometry")) {
+		restoreGeometry(settings.value("MainWindow.Geometry").toByteArray());
+	}
+
+	if(settings.contains("MainWindow.State")) {
+		restoreState(settings.value("MainWindow.State").toByteArray());
+	}
+
+	if(settings.contains("MainSplitter.State")) {
+		main_splitter->restoreState(settings.value("MainSplitter.State").toByteArray());
+	}
+
+	// Restore status bar visibility
+	if(settings.contains("StatusBar.Visible")) {
+		eComics::actions->statusbar()->setChecked(settings.value("StatusBar.Visible").toBool());
+		status_bar->setVisible(settings.value("StatusBar.Visible").toBool());
+	} else {
+		eComics::actions->statusbar()->setChecked(true);
+		status_bar->setVisible(true);
+	}
 }
 
 
@@ -169,4 +190,9 @@ void MainWindow::toggleFullscreen() {
 		showFullScreen();
 		config->setFullscreen(true);
 	}
+}
+
+
+void MainWindow::toggleStatusBar(bool visible) {
+	status_bar->setVisible(visible);
 }

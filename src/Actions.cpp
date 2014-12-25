@@ -29,6 +29,15 @@ void Actions::destroy() {
 }
 
 
+/**
+ * QToolBar has built in toggle action, use this method to set tool_bar_action to built in action.
+ */
+void Actions::setToolBarAction(QAction *action) {
+	tool_bar_action = action;
+}
+
+
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *										ACTIONS PRIVATE METHODS 								 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -49,14 +58,14 @@ Actions::Actions(QWidget *parent) {
 	add_to_list_action	=	new QAction(tr("&Add to list"), parent);
 	info_action			=	new QAction(style->standardIcon(QStyle::SP_FileDialogDetailedView),
 							tr("&Info"), parent);
-	remove_action		=	new QAction(tr("&Remove from library"), parent);
-	delete_action		=	new QAction(tr("&Delete from disk"), parent);
+	remove_action		=	new QAction(tr("Remove from library"), parent);
+	delete_action		=	new QAction(tr("Delete from disk"), parent);
 	preferences_action	=	new QAction(tr("&Preferences"), parent);
 
 	// Create view actions
-	fullscreen_action	=	new QAction(tr("&Fullscreen"), parent);
-	side_pane_action	=	new QAction(tr("&Show side pane"), parent);
-	statusbar_action	=	new QAction(tr("&Show status bar"), parent);
+	fullscreen_action	=	new QAction(tr("&Full Screen"), parent);
+	side_pane_action	=	new QAction(tr("Show side pane"), parent);
+	statusbar_action	=	new QAction(tr("Show status bar"), parent);
 
 	// Create tools actions
 	scan_library_action		=	new QAction(tr("&Scan library"), parent);
@@ -71,6 +80,9 @@ Actions::Actions(QWidget *parent) {
 	// Create library navigation actions
 	navigate_back_action	=	new QAction(style->standardIcon(QStyle::SP_ArrowLeft), tr("&Back"),
 								parent);
+
+	side_pane_action->setCheckable(true);
+	statusbar_action->setCheckable(true);
 
 	// Connect keyboard shortcuts
 	connect(f12_shortcut, SIGNAL(activated()), fullscreen_action, SIGNAL(triggered()));

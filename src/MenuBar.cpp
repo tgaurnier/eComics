@@ -55,6 +55,7 @@ MenuBar::MenuBar(QMainWindow *parent) : QObject(parent) {
 
 	// Add view actions
 	view_menu->addAction(eComics::actions->fullscreen());
+	view_menu->addAction(eComics::actions->toolBar());
 	view_menu->addAction(eComics::actions->sidePane());
 	view_menu->addAction(eComics::actions->statusbar());
 

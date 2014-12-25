@@ -44,9 +44,8 @@ class MainSidePane : public QWidget {
 		void refreshLists();
 		void initSelectedList();
 
-		signals:
-			void selectedListChanged(const QString &);
-
+	signals:
+		void selectedListChanged(const QString &);
 
 	private:
 		// QListView for choosing Comics or Manga library
@@ -86,9 +85,15 @@ class MainSidePane : public QWidget {
 		QLabel *lists_label;
 		static LibraryListView *library_list_view;
 		static UserListView *user_list_view;
+		bool is_visible;
 
 		MainSidePane(QWidget *parent);
 		~MainSidePane();
+		void restoreSettings();
+		void saveSettings();
+
+	private slots:
+		void toggleVisibility(bool visible);
 };
 
 

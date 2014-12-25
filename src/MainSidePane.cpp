@@ -3,8 +3,10 @@
 #include <QLabel>
 #include <QListView>
 #include <QVBoxLayout>
+#include <QSettings>
 #include <QStringListModel>
 
+#include "Actions.hpp"
 #include "Config.hpp"
 
 
@@ -24,11 +26,13 @@ MainSidePane::UserListView *MainSidePane::user_list_view		=	nullptr;
 void MainSidePane::init(QWidget *parent) {
 	if(main_side_pane == nullptr) {
 		main_side_pane = new MainSidePane(parent);
+		main_side_pane->restoreSettings();
 	}
 }
 
 
 void MainSidePane::destroy() {
+	main_side_pane->saveSettings();
 	delete main_side_pane;
 	main_side_pane = nullptr;
 }
@@ -76,6 +80,10 @@ MainSidePane::MainSidePane(QWidget *parent) : QWidget(parent) {
 	// Set width
 	setMinimumWidth(50);
 	setMaximumWidth(300);
+
+	// Connect signals
+	connect(eComics::actions->sidePane(), SIGNAL(toggled(bool)), this,
+			SLOT(toggleVisibility(bool)));
 }
 
 
@@ -85,6 +93,38 @@ MainSidePane::~MainSidePane() {
 	delete lists_label;
 	LibraryListView::destroy();
 	LibraryListView::destroy();
+}
+
+
+void MainSidePane::toggleVisibility(bool visible) {
+	setVisible(visible);
+	is_visible = visible;
+}
+
+
+/**
+ * Restore widget settings.
+ */
+void MainSidePane::restoreSettings() {
+	QSettings settings("ToryGaurnier", "eComics");
+
+	if(settings.contains("MainSidePane.Visible")) {
+		is_visible = settings.value("MainSidePane.Visible").toBool();
+	} else {
+		is_visible = true;
+	}
+
+	eComics::actions->sidePane()->setChecked(is_visible);
+	setVisible(is_visible);
+}
+
+
+/**
+ * Save widget settings.
+ */
+void MainSidePane::saveSettings() {
+	QSettings settings("ToryGaurnier", "eComics");
+	settings.setValue("MainSidePane.Visible", is_visible);
 }
 
 

@@ -56,6 +56,8 @@ ToolBar::~ToolBar() {}
  * QActions cannot be added to ToolBar within constructor, so this is used to add them after.
  */
 void ToolBar::initActions() {
+	eComics::actions->setToolBarAction(toggleViewAction());
+
 	addAction(eComics::actions->navigateBack());
 	addAction(eComics::actions->info());
 	//TODO: FINISH ADDING ACTIONS
