@@ -40,6 +40,7 @@ class Config : public QObject {
 		void save();
 		const QString& getBinDir() const;
 		QString getIconPath() const;
+		QString getSplashPath() const;
 		QDir getRootDir() const;
 		QString getRootPath() const;
 		QDir getThumbDir() const;
@@ -69,6 +70,7 @@ class Config : public QObject {
 	private:
 		QFile *file;
 		QString icon_path;
+		QString splash_path;
 		QString bin_dir;
 		QDir root_dir;
 		QDir thumb_dir;
