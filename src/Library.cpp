@@ -1,14 +1,17 @@
 #include "Library.hpp"
 
+#include <QApplication>
 #include <QErrorMessage>
 #include <QFileDialog>
 
 #include "ConfirmationDialog.hpp"
 #include "LibraryView.hpp"
 #include "MainWindow.hpp"
+#include "SplashScreen.hpp"
 
 
 Library *library = nullptr;
+LibraryWorker *Library::worker;
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -20,10 +23,27 @@ void Library::init() {
 	if(library == nullptr) {
 		library = new Library;
 
+		// Start splash screen and connect it to library
+		SplashScreen::start();
+		connect(library, SIGNAL(startedWorker(const QString &)),
+				splash_screen, SLOT(update(const QString &)));
+
 		// The rest of this stuff must be done in init() rather than constructor to avoid segfaults
 		// Check for config file and load it if it exists
 		if(library->file->exists() && library->file->size() > 0) {
-			try { library->loadFromFile(); } catch(const eComics::Exception &e) { e.printMsg(); }
+			// Prepare event loop
+			QEventLoop loop;
+			connect(library->thread, SIGNAL(finished()), &loop, SLOT(quit()));
+
+			// Connect worker method to thread
+			connect(library->thread, SIGNAL(started()), library->worker, SLOT(loadLibrary()));
+
+			// Start thread and event loop
+			library->thread->start();
+			loop.exec();
+
+			// When finished make sure to disconnect worker method from thread
+			disconnect(library->thread, SIGNAL(started()), library->worker, SLOT(loadLibrary()));
 		}
 
 		// Scan directories to add any missing comics and remove comics that do not exist on disk
@@ -630,16 +650,216 @@ void Library::removeSelectedComics() {
 
 
 /**
+ * Start worker thread and start it's scanDirectories() method.
+ */
+void Library::scanDirectories() {
+	// Prepare event loop
+	QEventLoop loop;
+	connect(thread, SIGNAL(finished()), &loop, SLOT(quit()));
+
+	// Connect worker method to event loop
+	connect(thread, SIGNAL(started()), worker, SLOT(scanDirectories()));
+
+	// Start thread and event loop
+	thread->start();
+	loop.exec();
+
+	// When finished make sure to disconnect worker method from thread
+	disconnect(thread, SIGNAL(started()), worker, SLOT(scanDirectories()));
+}
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *									LIBRARY PRIVATE METHODS 									 *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+Library::Library() {
+	// Initialize null comic
+	null = ComicFile();
+
+	// Initialize file pointer
+	file = new QFile(config->getRootDir().absolutePath() + "/library.xml");
+
+	// Initialize library worker and it's thread
+	worker	=	new LibraryWorker();
+	thread	=	new QThread();
+	worker->moveToThread(thread);
+
+	// Connect signals for worker and it's thread
+	connect(this, SIGNAL(finishedWorker(const QString &)), thread, SLOT(quit()));
+
+	// Connect actions
+	eComics::Actions *actions = eComics::actions;
+	connect(actions->addComics(), SIGNAL(triggered()), this, SLOT(addComics()));
+	connect(actions->cleanupFiles(), SIGNAL(triggered()), this, SLOT(cleanupFiles()));
+	connect(actions->deleteFile(), SIGNAL(triggered()), this, SLOT(deleteSelectedComics()));
+	connect(actions->remove(), SIGNAL(triggered()), this, SLOT(removeSelectedComics()));
+	connect(actions->scanLibrary(), SIGNAL(triggered()), this, SLOT(scanDirectories()));
+}
+
+
+Library::~Library() {
+	delete file;
+	delete worker;
+	delete thread;
+}
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *								LIBRARYWORKER PRIVATE METHODS 									 *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+void LibraryWorker::loadLibrary() {
+	emit library->startedWorker(tr("Loading library..."));
+	qDebug() << "Loading library...";
+
+	QFile *file = library->file;
+
+	try {
+		// Open file for reading
+		if(!file->open(QIODevice::ReadOnly | QIODevice::Text)) {
+			throw eComics::Exception(eComics::FILE_ERROR, "Library::loadFromFile()",
+					QString("Failed to open ") + file->fileName() + " for reading");
+		}
+
+		// Setup xml reader
+		QXmlStreamReader reader(file);
+
+		// Loop
+		while(!reader.atEnd()) {
+			reader.readNextStartElement();
+
+			// Skip end elements
+			// Occasionally an unexpected blank element will be read, skip it
+			if(reader.isEndElement() || reader.name() == "") {
+				continue;
+			}
+
+			// If an error occurs, throw exception
+			else if(reader.hasError()) {
+				throw eComics::Exception(eComics::XML_READ_ERROR, "Library::loadFromFile()",
+						file->fileName(), &reader);
+			}
+
+			// Next, if at a <Comic> element, loop through it's metadata tags
+			if(reader.name() == "Comic") {
+				// Start on first child of <Comic>
+				reader.readNextStartElement();
+
+				ComicInfo info;
+				QString comic_path;
+				QByteArray md5_hash;
+
+				// Loop through elements until </Comic> is found
+				while(!(reader.name() == "Comic" && reader.isEndElement())) {
+					if(reader.hasError()) {
+						throw eComics::Exception(eComics::XML_READ_ERROR, "Library::loadFromFile()",
+								file->fileName(), &reader);
+					}
+
+					// If not end element for metadata tag, check if element is a valid MetadataTag
+					else if(!reader.isEndElement()) {
+						// Check if MetadataTag
+						if(!info[reader.name().toString()].isNull()) {
+							info[reader.name().toString()].setValue(reader.readElementText());
+						}
+
+						// Check if PageList
+						else if(reader.name() == "Pages") {
+							reader.readNextStartElement();
+
+							// Loop through pages
+							while(reader.name() == "Page") {
+								// Even though <Page/> is a single self closing element, it will
+								// still recognize a closing </Page>, so we have to skip it
+								if(!reader.isEndElement()) {
+									QXmlStreamAttributes attributes = reader.attributes();
+									Page page(attributes.value("Image").toString());
+
+									// For the rest, if they are empty don't add them
+									if(attributes.hasAttribute("Type")) {
+										page.setType(attributes.value("Type").toString());
+									}
+
+									if(attributes.hasAttribute("DoublePage")) {
+										page.setDoublePage(
+												attributes.value("DoublePage").toString());
+									}
+
+									if(attributes.hasAttribute("ImageSize")) {
+										page.setImageSize(attributes.value("ImageSize").toString());
+									}
+
+									if(attributes.hasAttribute("Key")) {
+										page.setKey(attributes.value("Key").toString());
+									}
+
+									if(attributes.hasAttribute("ImageWidth")) {
+										page.setImageWidth(
+												attributes.value("ImageWidth").toString());
+									}
+
+									if(attributes.hasAttribute("ImageHeight")) {
+										page.setImageHeight(
+												attributes.value("ImageHeight").toString());
+									}
+
+									info.page_list << page;
+								}
+
+								reader.readNextStartElement();
+							}
+						}
+
+						// Check if path
+						else if(reader.name() == "Path") {
+							comic_path = reader.readElementText();
+						}
+
+						// Check if md5 hash
+						else if(reader.name() == "Md5Hash") {
+							md5_hash = reader.readElementText().toLocal8Bit();
+						}
+					}
+
+					reader.readNextStartElement();
+				}
+
+				// Load ComicFile, setting it's ComicInfo to info loaded from library
+				ComicFile comic(comic_path, info, md5_hash);
+
+				// If ComicFile was modified and has different md5_hash, then mark library dirty
+				if(comic.getMd5Hash() != md5_hash) library->dirty = true;
+
+				// Append ComicFile to library
+				(*library) << comic;
+			}
+		}
+
+		file->close();
+
+		// If any comics are different from what was loaded, then re-save library
+		if(library->dirty) library->save();
+	} catch(const eComics::Exception &e) { e.printMsg(); }
+
+	emit library->finishedWorker(tr("Finished loading library"));
+}
+
+
+/**
  * Scans Comic and/or Manga directories defined in Config object, adding/removing comics/manga from
  * library as needed. save() will automatically be called after this.
  */
-void Library::scanDirectories() {
+void LibraryWorker::scanDirectories() {
+	emit library->startedWorker(tr("Scanning directories..."));
 	qDebug() << "Scanning directories for changes...";
 
 	// First scan library for non-existent comics, and remove them
-	for(int i = 0; i < this->size(); i++) {
-		if(!QFile::exists((*this)[i].getPath())) {
-			this->removeAt(i);
+	for(int i = 0; i < library->size(); i++) {
+		if(!QFile::exists((*library)[i].getPath())) {
+			library->removeAt(i);
 		}
 	}
 
@@ -681,19 +901,19 @@ void Library::scanDirectories() {
 			}
 
 			// Next check if file at path already exists in library
-			if(this->contains(cur->filePath())) {
+			if(library->contains(cur->filePath())) {
 				// If it exists in library, check if it's been modified by comparing the md5 hash
-				if(this->at(cur->filePath()).getMd5Hash() == cur_file.getMd5Hash()) {
+				if(library->at(cur->filePath()).getMd5Hash() == cur_file.getMd5Hash()) {
 					continue;
 				} else {
 					// If file has been modified, then remove from library to re-add
-					removeAt(indexOf(cur->filePath()));
+					library->removeAt(library->indexOf(cur->filePath()));
 				}
 			}
 
 			// Last add it to library and set dirty to true
-			(*this) << cur_file;
-			dirty = true;
+			(*library) << cur_file;
+			library->dirty = true;
 
 			// Update debug log
 			qDebug() << "Added to library:" << cur->filePath() << "\n";
@@ -705,161 +925,11 @@ void Library::scanDirectories() {
 	}
 
 	done_scanning:
-		if(dirty) try { save(); } catch(const eComics::Exception &e) { e.printMsg(); }
-}
-
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *									LIBRARY PRIVATE METHODS 									 *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-
-Library::Library() {
-	// Initialize null comic
-	null = ComicFile();
-
-	// Initialize file pointer
-	file = new QFile(config->getRootDir().absolutePath() + "/library.xml");
-
-	// Connect actions
-	eComics::Actions *actions = eComics::actions;
-	connect(actions->addComics(), SIGNAL(triggered()), this, SLOT(addComics()));
-	connect(actions->cleanupFiles(), SIGNAL(triggered()), this, SLOT(cleanupFiles()));
-	connect(actions->deleteFile(), SIGNAL(triggered()), this, SLOT(deleteSelectedComics()));
-	connect(actions->remove(), SIGNAL(triggered()), this, SLOT(removeSelectedComics()));
-	connect(actions->scanLibrary(), SIGNAL(triggered()), this, SLOT(scanDirectories()));
-}
-
-
-Library::~Library() {
-	delete file;
-}
-
-
-void Library::loadFromFile() {
-	qDebug() << "Loading library...";
-
-	// Open file for reading
-	if(!file->open(QIODevice::ReadOnly | QIODevice::Text)) {
-		throw eComics::Exception(eComics::FILE_ERROR, "Library::loadFromFile()",
-				QString("Failed to open ") + file->fileName() + " for reading");
-	}
-
-	// Setup xml reader
-	QXmlStreamReader reader(file);
-
-	// Loop
-	while(!reader.atEnd()) {
-		reader.readNextStartElement();
-
-		// Skip end elements
-		// Occasionally an unexpected blank element will be read, skip it
-		if(reader.isEndElement() || reader.name() == "") {
-			continue;
+		if(library->dirty) try {
+			library->save();
+		} catch(const eComics::Exception &e) {
+			e.printMsg();
 		}
 
-		// If an error occurs, throw exception
-		else if(reader.hasError()) {
-			throw eComics::Exception(eComics::XML_READ_ERROR, "Library::loadFromFile()",
-					file->fileName(), &reader);
-		}
-
-		// Next, if at a <Comic> element, loop through it's metadata tags
-		if(reader.name() == "Comic") {
-			// Start on first child of <Comic>
-			reader.readNextStartElement();
-
-			ComicInfo info;
-			QString comic_path;
-			QByteArray md5_hash;
-
-			// Loop through elements until </Comic> is found
-			while(!(reader.name() == "Comic" && reader.isEndElement())) {
-				if(reader.hasError()) {
-					throw eComics::Exception(eComics::XML_READ_ERROR, "Library::loadFromFile()",
-							file->fileName(), &reader);
-				}
-
-				// If not an end element for metadata tag, Check if element is a valid MetadataTag
-				else if(!reader.isEndElement()) {
-					// Check if MetadataTag
-					if(!info[reader.name().toString()].isNull()) {
-						info[reader.name().toString()].setValue(reader.readElementText());
-					}
-
-					// Check if PageList
-					else if(reader.name() == "Pages") {
-						reader.readNextStartElement();
-
-						// Loop through pages
-						while(reader.name() == "Page") {
-							// Even though <Page/> is a single self closing element, it will still
-							// Recognize a closing </Page>, so we have to skip it
-							if(!reader.isEndElement()) {
-								QXmlStreamAttributes attributes = reader.attributes();
-								Page page(attributes.value("Image").toString());
-
-								// For the rest, if they are empty don't add them
-								if(attributes.hasAttribute("Type")) {
-									page.setType(attributes.value("Type").toString());
-								}
-
-								if(attributes.hasAttribute("DoublePage")) {
-									page.setDoublePage(attributes.value("DoublePage").toString());
-								}
-
-								if(attributes.hasAttribute("ImageSize")) {
-									page.setImageSize(attributes.value("ImageSize").toString());
-								}
-
-								if(attributes.hasAttribute("Key")) {
-									page.setKey(attributes.value("Key").toString());
-								}
-
-								if(attributes.hasAttribute("ImageWidth")) {
-									page.setImageWidth(
-											attributes.value("ImageWidth").toString());
-								}
-
-								if(attributes.hasAttribute("ImageHeight")) {
-									page.setImageHeight(
-											attributes.value("ImageHeight").toString());
-								}
-
-								info.page_list << page;
-							}
-
-							reader.readNextStartElement();
-						}
-					}
-
-					// Check if path
-					else if(reader.name() == "Path") {
-						comic_path = reader.readElementText();
-					}
-
-					// Check if md5 hash
-					else if(reader.name() == "Md5Hash") {
-						md5_hash = reader.readElementText().toLocal8Bit();
-					}
-				}
-
-				reader.readNextStartElement();
-			}
-
-			// Load ComicFile, setting it's ComicInfo to info loaded from library
-			ComicFile comic(comic_path, info, md5_hash);
-
-			// If loaded ComicFile was modified and has different md5_hash, then mark library dirty
-			if(comic.getMd5Hash() != md5_hash) dirty = true;
-
-			// Append ComicFile to library
-			(*this) << comic;
-		}
-	}
-
-	file->close();
-
-	// If any comics are different from what was loaded, then re-save library
-	if(dirty) save();
+	emit library->finishedWorker(tr("Finished scanning directories"));
 }

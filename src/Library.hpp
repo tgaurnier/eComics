@@ -21,14 +21,18 @@
 #define LIBRARY_HPP
 
 
-#include <QDirIterator>
 #include <QDebug>
+#include <QDirIterator>
+#include <QThread>
 
 #include "Actions.hpp"
 #include "ComicInfo.hpp"
 #include "ComicFile.hpp"
 #include "Config.hpp"
 #include "ReferenceList.hpp"
+
+
+class LibraryWorker;
 
 
 /**
@@ -42,6 +46,9 @@
  */
 class Library : public QObject, public QList<ComicFile> {
 	Q_OBJECT
+
+	friend class LibraryWorker;
+
 
 	public:
 		// Attribute lists for attributes that multiple comics will share
@@ -104,15 +111,21 @@ class Library : public QObject, public QList<ComicFile> {
 		ComicFile& operator[](const QString &path);
 		const ComicFile & operator[](const QString &path) const;
 
+	signals:
+		void startedWorker(const QString &msg);
+		void finishedWorker(const QString &msg);
+
 	public slots:
 		void addComics();
 		void cleanupFiles();
 		void deleteSelectedComics();
-		void scanDirectories();
 		void removeSelectedComics();
+		void scanDirectories();
 
 	private:
 		static Library *instance;
+		static LibraryWorker *worker;
+		QThread *thread;
 		QFile *file;
 		ComicFile null;
 		bool dirty			=	false;
@@ -120,10 +133,24 @@ class Library : public QObject, public QList<ComicFile> {
 
 		Library();
 		~Library();
-		void loadFromFile();
 };
 
 extern Library *library;
+
+
+/**
+ * This is a worker class for the library, all of it's members are private so only Library can
+ * access them.
+ */
+class LibraryWorker : public QObject {
+	Q_OBJECT
+
+	friend class Library;
+
+	private slots:
+		void loadLibrary();
+		void scanDirectories();
+};
 
 
 #endif
