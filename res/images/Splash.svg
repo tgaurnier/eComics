@@ -25,7 +25,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -52,7 +52,7 @@
      inkscape:window-x="63"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g3979" />
+     inkscape:current-layer="text3977" />
   <defs
      id="defs4">
     <filter
@@ -148,7 +148,8 @@
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cccccccccccccccccccccc" />
     <g
-       id="g3924">
+       id="g3924"
+       transform="matrix(0.95677073,-0.14269721,0.59279201,0.95677073,-458.32022,78.698053)">
       <g
          transform="matrix(0.03794425,-0.00635759,0.01295793,0.01861669,314.36041,789.22492)"
          style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
@@ -159,7 +160,7 @@
              id="g3979">
             <g
                id="g4007"
-               transform="translate(-4.3853395,-5.7244044)">
+               transform="translate(1.5826451,-3.6863407)">
               <path
                  style="font-size:50.23104858px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffff00;fill-opacity:1;stroke:#ff0000;stroke-width:0.28927737;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;font-family:Sans"
                  d="m 304.34781,794.80781 -0.63212,-0.80637 2.14923,0.093 -1.26426,-1.11652 2.71817,0.77536 0.44249,-1.0855 2.02282,0.99246 1.4539,-1.08551 0.0632,1.2716 3.16065,-0.58928 -1.32748,0.99246 2.02282,0.93044 -2.97102,-0.21711 0.63214,0.74435 -2.46532,-0.49623 -1.0114,1.20958 -1.32748,-0.80638 -2.52852,1.64374 0.18964,-1.61276 -2.59174,-0.24812 z"
@@ -199,7 +200,7 @@
     </g>
     <g
        id="g3917"
-       transform="translate(0.31606559,-0.52724529)">
+       transform="matrix(0.98436596,0.08641776,-0.35899621,0.98436596,290.91641,-14.472148)">
       <g
          transform="matrix(0.03705396,0.00751611,-0.01531923,0.01817988,350.71356,792.98689)"
          style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
