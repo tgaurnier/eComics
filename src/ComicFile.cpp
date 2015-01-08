@@ -478,6 +478,8 @@ bool ComicFile::operator ==(const ComicFile &comic) {
 
 
 void ComicFile::connectSignals() {
+	// Make connection to MetadataTag queued so it can be properly accessed from a QThread
+	qRegisterMetaType<MetadataTag>("MetadataTag");
 	connect(&info, SIGNAL(tagChanged(const MetadataTag &, const QString)), this,
 		SLOT(onInfoChanged(const MetadataTag &, const QString)));
 	connect(this, SIGNAL(addedToLibrary()), this, SLOT(onAddedToLibrary()));
