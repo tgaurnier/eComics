@@ -1,6 +1,7 @@
 #include "Actions.hpp"
 
 #include <QApplication>
+#include <QDebug>
 #include <QShortcut>
 #include <QStyle>
 
@@ -56,8 +57,7 @@ Actions::Actions(QWidget *parent) {
 
 	// Create edit actions
 	add_to_list_action	=	new QAction(tr("&Add to List"), parent);
-	info_action			=	new QAction(style->standardIcon(QStyle::SP_FileDialogDetailedView),
-							tr("&Info"), parent);
+	info_action			=	new QAction(tr("&Info"), parent);
 	remove_action		=	new QAction(tr("Remove from Library"), parent);
 	delete_action		=	new QAction(tr("Delete from Disk"), parent);
 	preferences_action	=	new QAction(tr("&Preferences"), parent);
@@ -81,6 +81,7 @@ Actions::Actions(QWidget *parent) {
 	navigate_back_action	=	new QAction(style->standardIcon(QStyle::SP_ArrowLeft), tr("&Back"),
 								parent);
 
+	// Make appropriate actions checkable
 	full_screen_action->setCheckable(true);
 	side_pane_action->setCheckable(true);
 	status_bar_action->setCheckable(true);
