@@ -196,19 +196,10 @@ void ComicInfoDialog::MultipleInfoPage::onFinished(const int result) {
 		QProgressDialog progress_dialog(tr("Saving metadata to comic files..."), 0, 0,
 		comic_info_dialog->selected_list.size(), comic_info_dialog);
 		progress_dialog.setWindowModality(Qt::WindowModal);
+		progress_dialog.setMinimumDuration(500);
 		progress_dialog.setCancelButton(0);
 		progress_dialog.show();
 		progress_dialog.setValue(0);
-		/**
-		 * NOTE
-		 *
-		 * QApplication::processEvents() is implicitly called by QProgressDialog::setValue(). Still
-		 * need to call processEvents after setValue, even though it is redundant, because this
-		 * process will sometimes be too fast to show progress bar, but slow enough for the user to
-		 * notice (and therefore we need to force the progressbar to show by calling processEvents
-		 * a second time).
-		 */
-		QApplication::processEvents();
 
 		int i = 0;
 		for(ComicFile &comic : comic_info_dialog->selected_list) {
@@ -321,7 +312,7 @@ void ComicInfoDialog::MultipleInfoPage::onFinished(const int result) {
 
 			comic.finishEditing();
 			progress_dialog.setValue(++i);
-			QApplication::processEvents(); // See NOTE above
+			QApplication::processEvents();
 		}
 
 		library->finishBatchEditing();
