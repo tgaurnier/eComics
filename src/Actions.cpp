@@ -45,7 +45,6 @@ void Actions::setToolBarAction(QAction *action) {
 
 
 Actions::Actions(QWidget *parent) {
-	//TODO: THIS IS WHERE I'M AT, FINISH CONNECTING ACTIONS
 	f12_shortcut	=	new QShortcut(QKeySequence("F12"), parent);
 	style			=	QApplication::style();
 
