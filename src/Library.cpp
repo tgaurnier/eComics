@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QErrorMessage>
 #include <QFileDialog>
+#include <QProgressDialog>
 
 #include "ConfirmationDialog.hpp"
 #include "LibraryView.hpp"
@@ -28,13 +29,13 @@ void Library::init() {
 		connect(library, SIGNAL(startedWorker(const QString &)),
 				splash_screen, SLOT(update(const QString &)));
 
+		// Prepare event loop
+		QEventLoop loop;
+		connect(library->thread, SIGNAL(finished()), &loop, SLOT(quit()));
+
 		// The rest of this stuff must be done in init() rather than constructor to avoid segfaults
 		// Check for config file and load it if it exists
 		if(library->file->exists() && library->file->size() > 0) {
-			// Prepare event loop
-			QEventLoop loop;
-			connect(library->thread, SIGNAL(finished()), &loop, SLOT(quit()));
-
 			// Connect worker method to thread
 			connect(library->thread, SIGNAL(started()), library->worker, SLOT(loadLibrary()));
 
@@ -47,7 +48,15 @@ void Library::init() {
 		}
 
 		// Scan directories to add any missing comics and remove comics that do not exist on disk
-		library->scanDirectories();
+		// Connect worker method to event loop
+		connect(library->thread, SIGNAL(started()), library->worker, SLOT(scanDirectories()));
+
+		// Start thread and event loop
+		library->thread->start();
+		loop.exec();
+
+		// When finished make sure to disconnect worker method from thread
+		disconnect(library->thread, SIGNAL(started()), library->worker, SLOT(scanDirectories()));
 	}
 }
 
@@ -650,19 +659,23 @@ void Library::removeSelectedComics() {
 
 
 /**
- * Start worker thread and start it's scanDirectories() method.
+ * Start worker thread and start it's scanDirectories() method, with an indeterminate progress
+ * dialog waiting the main thread.
  */
 void Library::scanDirectories() {
-	// Prepare event loop
-	QEventLoop loop;
-	connect(thread, SIGNAL(finished()), &loop, SLOT(quit()));
+	// Prepare progress dialog
+	QProgressDialog progress_dialog(tr("Scanning directories..."), 0, 0, 0, main_window);
+	progress_dialog.setWindowModality(Qt::WindowModal);
+	progress_dialog.setMinimumDuration(1500);
+	progress_dialog.setCancelButton(0);
+	connect(thread, SIGNAL(finished()), &progress_dialog, SLOT(accept()));
 
 	// Connect worker method to event loop
 	connect(thread, SIGNAL(started()), worker, SLOT(scanDirectories()));
 
 	// Start thread and event loop
 	thread->start();
-	loop.exec();
+	progress_dialog.exec();
 
 	// When finished make sure to disconnect worker method from thread
 	disconnect(thread, SIGNAL(started()), worker, SLOT(scanDirectories()));
