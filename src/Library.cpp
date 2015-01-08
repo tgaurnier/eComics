@@ -518,14 +518,33 @@ void Library::addComics() {
  * library.
  */
 void Library::cleanupFiles() {
+	// Prepare progress dialog
+	QProgressDialog progress_dialog(tr("Moving files..."), 0, 0, this->size(), main_window);
+	progress_dialog.setWindowModality(Qt::WindowModal);
+	progress_dialog.setMinimumDuration(500);
+	progress_dialog.setCancelButton(0);
+	progress_dialog.show();
+	progress_dialog.setValue(0);
+	int i = 0;
+
 	// Move each comic to it's appropriate directory
-	for(ComicFile &comic : *this) comic.move();
+	for(ComicFile &comic : *this) {
+		comic.move();
+		progress_dialog.setValue(++i);
+	}
+
+	// Update progress dialog and set indeterminate
+	progress_dialog.setLabelText(tr("Deleting empty folders..."));
+	progress_dialog.setMaximum(0);
+	progress_dialog.show();
+	progress_dialog.setValue(0);
 
 	// Scan directories for empty folders and delete them
 	QDirIterator *cur = nullptr;
 
 	// 2x loop, once for comics, another for manga
 	for(int count = 1; count <= 2; count++) {
+		QApplication::processEvents();
 		// On first iteration set cur to comic dir if it's enabled, on second do manga
 		switch(count) {
 			case 1:
@@ -546,6 +565,7 @@ void Library::cleanupFiles() {
 
 		// Loop through current directory iterator getting comics
 		while(cur->hasNext()) {
+			QApplication::processEvents();
 			cur->next();
 
 			// If not a dir, skip
@@ -565,6 +585,8 @@ void Library::cleanupFiles() {
 	}
 
 	done_cleaning:
+		progress_dialog.setLabelText(tr("Saving library..."));
+		QApplication::processEvents();
 		save();
 }
 
