@@ -121,6 +121,9 @@ class LibraryView : public QListView {
 
 		LibraryView(QWidget *parent = 0);
 		~LibraryView();
+
+		private slots:
+			void onSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 };
 
 extern LibraryView *library_view;

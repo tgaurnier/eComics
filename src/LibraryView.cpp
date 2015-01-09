@@ -135,11 +135,45 @@ LibraryView::LibraryView(QWidget *parent) : QListView(parent) {
 		this, SLOT(onListChanged(const QString &)));
 	connect(this, SIGNAL(activated(const QModelIndex &)),
 		this, SLOT(onItemActivated(const QModelIndex &)));
+	connect(
+		selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+		this, SLOT(onSelectionChanged(const QItemSelection &, const QItemSelection &))
+	);
+
+	// If nothing selected on start, disabled appropriate actions
+	if(getSelectedComics().size() == 0) {
+		eComics::actions->open()->setEnabled(false);
+		eComics::actions->addToList()->setEnabled(false);
+		eComics::actions->info()->setEnabled(false);
+		eComics::actions->remove()->setEnabled(false);
+		eComics::actions->deleteFile()->setEnabled(false);
+		eComics::actions->convert()->setEnabled(false);
+	}
 }
 
 
 LibraryView::~LibraryView() {
 	LibraryModel::destroy();
+}
+
+
+void LibraryView::onSelectionChanged(const QItemSelection &selected,
+		const QItemSelection &deselected) {
+	if(selected.size() == 0) {
+		eComics::actions->open()->setEnabled(false);
+		eComics::actions->addToList()->setEnabled(false);
+		eComics::actions->info()->setEnabled(false);
+		eComics::actions->remove()->setEnabled(false);
+		eComics::actions->deleteFile()->setEnabled(false);
+		eComics::actions->convert()->setEnabled(false);
+	} else {
+		eComics::actions->open()->setEnabled(true);
+		eComics::actions->addToList()->setEnabled(true);
+		eComics::actions->info()->setEnabled(true);
+		eComics::actions->remove()->setEnabled(true);
+		eComics::actions->deleteFile()->setEnabled(true);
+		eComics::actions->convert()->setEnabled(true);
+	}
 }
 
 
