@@ -57,6 +57,8 @@ void Library::init() {
 
 		// When finished make sure to disconnect worker method from thread
 		disconnect(library->thread, SIGNAL(started()), library->worker, SLOT(scanDirectories()));
+
+		splash_screen->finish();
 	}
 }
 
