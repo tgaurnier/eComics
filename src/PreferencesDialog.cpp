@@ -112,6 +112,11 @@ void PreferencesDialog::onFinished(const int result) {
 			config->setGroupByPublisher(library_tab->group_by_publisher->isChecked());
 		}
 
+		// All enabled
+		if(config->isAllEnabled() != library_tab->all_enabled->isChecked()) {
+			config->setAllEnabled(library_tab->all_enabled->isChecked());
+		}
+
 		// Comics enabled
 		if(config->isComicEnabled() != library_tab->comic_enabled->isChecked()) {
 			config->setComicEnabled(library_tab->comic_enabled->isChecked());
@@ -164,6 +169,8 @@ void PreferencesDialog::onFinished(const int result) {
 void PreferencesDialog::toggleComicEnabled(int state) {
 	library_tab->comic_location->setEnabled(state);
 	library_tab->comic_location_help->setEnabled(state);
+	library_tab->all_enabled->setEnabled(state && config->isMangaEnabled());
+	library_tab->all_enabled->setEnabled(state && config->isMangaEnabled());
 	verifyOkButton();
 }
 
@@ -171,6 +178,8 @@ void PreferencesDialog::toggleComicEnabled(int state) {
 void PreferencesDialog::toggleMangaEnabled(int state) {
 	library_tab->manga_location->setEnabled(state);
 	library_tab->manga_location_help->setEnabled(state);
+	library_tab->all_enabled->setEnabled(state && config->isComicEnabled());
+	library_tab->all_enabled_help->setEnabled(state && config->isComicEnabled());
 	verifyOkButton();
 }
 
@@ -227,6 +236,10 @@ PreferencesDialog::LibraryTab::LibraryTab() {
 	group_by_publisher_help	=	new HelpButton(tr("If this is enabled then comics will be ") +
 								tr("organized by Publisher/Series/Volume, if it is not enabled ") +
 								tr("then they will be organized by Series/Volume."), this);
+	all_enabled				=	new QCheckBox(tr("Enable 'All' category"), this);
+	all_enabled_help		=	new HelpButton(tr("If you have Comics and Manga enabled, this ") +
+								tr("will show an 'All' category along with Comics and Manga."),
+								this);
 	comic_enabled			=	new QCheckBox(tr("Enable Comics"), this);
 	comic_enabled_help		=	new HelpButton(tr("eComics supports organizing Comics and Manga ") +
 								tr("in different folders. If you have Comics, or you just want ") +
@@ -257,10 +270,14 @@ PreferencesDialog::LibraryTab::LibraryTab() {
 	manga_enabled->setChecked(config->isMangaEnabled());
 	manga_location->setEnabled(config->isMangaEnabled());
 	if(config->isMangaEnabled()) manga_location->setPath(config->getMangaPath());
+	if(config->isComicEnabled() && config->isMangaEnabled()) {
+		all_enabled->setChecked(config->isAllEnabled());
+	}
 
 	// Add items to form
 	form_layout->addRow(manage_files, manage_files_help);
 	form_layout->addRow(group_by_publisher, group_by_publisher_help);
+	form_layout->addRow(all_enabled, all_enabled_help);
 	form_layout->addRow(comic_enabled, comic_enabled_help);
 	form_layout->addRow(comic_location, comic_location_help);
 	form_layout->addRow(manga_enabled, manga_enabled_help);

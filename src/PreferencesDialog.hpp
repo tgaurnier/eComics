@@ -65,6 +65,9 @@ class PreferencesDialog : public QDialog {
 				// Group by publisher
 				QCheckBox *group_by_publisher;
 				HelpButton *group_by_publisher_help;
+				// All enabled
+				QCheckBox *all_enabled;
+				HelpButton *all_enabled_help;
 				// Comic enabled
 				QCheckBox *comic_enabled;
 				HelpButton *comic_enabled_help;

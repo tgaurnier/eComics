@@ -67,7 +67,9 @@ ReferenceList<ComicFile> LibraryView::getSelectedComics() {
  * Resets scope to top level.
  */
 void LibraryView::resetScope() {
-	if(config->isComicEnabled()) {
+	if(config->isAllEnabled()) {
+		model->cur_scope.library = "All";
+	} else if(config->isComicEnabled()) {
 		model->cur_scope.library = "Comics";
 	} else {
 		model->cur_scope.library = "Manga";
@@ -286,7 +288,8 @@ void LibraryView::LibraryModel::refreshList() {
 
 	for(ComicFile comic : *library) {
 		// Skip comics that are not part of selected library
-		if(!(comic.info.getManga() == "Yes" && cur_scope.library == "Manga") &&
+		if(cur_scope.library != "All" &&
+			!(comic.info.getManga() == "Yes" && cur_scope.library == "Manga") &&
 			!(comic.info.getManga() == "No" && cur_scope.library == "Comics") &&
 			cur_scope.user_list.isEmpty()) continue;
 

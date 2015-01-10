@@ -142,6 +142,7 @@ void FirstRunDialog::onAccepted() {
 	config->setMangaEnabled(manga_enabled->checkState() == Qt::Checked);
 	if(config->isComicEnabled()) config->setComicDir(comic_location->getPath());
 	if(config->isMangaEnabled()) config->setMangaDir(manga_location->getPath());
+	if(config->isComicEnabled() && config->isMangaEnabled()) config->setAllEnabled(true);
 	config->save();
 }
 

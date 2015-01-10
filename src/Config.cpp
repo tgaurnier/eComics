@@ -51,6 +51,7 @@ void Config::save() {
 	buff += "group_by_publisher = " + QByteArray::number(group_by_publisher) + "\n";
 	buff += "temp_dir = " + temp_dir.absolutePath() + "\n";
 	buff += "thumb_dir = " + thumb_dir.absolutePath() + "\n";
+	buff += QByteArray("all_enabled = ") + QByteArray::number(all_enabled) + "\n";
 	buff += QByteArray("comic_enabled = ") + QByteArray::number(comic_enabled) + "\n";
 	buff += QByteArray("manga_enabled = ") + QByteArray::number(manga_enabled) + "\n";
 	if(comic_enabled) {
@@ -89,6 +90,7 @@ QString Config::getMangaPath() const { return manga_dir.absolutePath(); }
 bool Config::manageFiles() const { return manage_files; }
 bool Config::groupByPublisher() const { return group_by_publisher; }
 bool Config::isEmpty() const { return empty; }
+bool Config::isAllEnabled() const { return all_enabled; }
 bool Config::isComicEnabled() const { return comic_enabled; }
 bool Config::isMangaEnabled() const { return manga_enabled; }
 QString Config::getSelectedList() const { return selected_list; }
@@ -103,6 +105,7 @@ void Config::setTempDir(const QString &path) { setDir(temp_dir, path); }
 void Config::setThumbDir(const QString &path) { setDir(thumb_dir, path); }
 void Config::setComicDir(const QString &path) { setDir(comic_dir, path); }
 void Config::setMangaDir(const QString &path) { setDir(manga_dir, path); }
+void Config::setAllEnabled(const bool val) {  all_enabled = val; }
 void Config::setComicEnabled(const bool val) { comic_enabled = val; }
 void Config::setMangaEnabled(const bool val) { manga_enabled = val; }
 void Config::setManageFiles(const bool val) { manage_files = val; }
@@ -225,6 +228,10 @@ void Config::loadFromFile() {
 
 		else if(tok[0] == "thumb_dir") {
 			setThumbDir(value);
+		}
+
+		else if(tok[0] == "all_enabled") {
+			setAllEnabled(value.toInt());
 		}
 
 		else if(tok[0] == "comic_enabled") {

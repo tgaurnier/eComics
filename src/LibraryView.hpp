@@ -123,7 +123,8 @@ class LibraryView : public QListView {
 		~LibraryView();
 
 		private slots:
-			void onSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+			void onSelectionChanged(const QItemSelection &selected,
+				const QItemSelection &deselected);
 };
 
 extern LibraryView *library_view;
