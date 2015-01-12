@@ -133,7 +133,7 @@ void ComicFile::move() {
 	if(config->manageFiles()) {
 		// comic|manga_dir/publisher/series/volume/filename.ext
 		new_dir_path	+=	info.getPublisher() + "/" + info.getSeries() + "/" +
-							((info.getVolume().isEmpty()) ? "Unknown Volume" : info.getVolume()) +
+							((info.getVolume() == "?") ? "Unknown Volume" : info.getVolume()) +
 							"/";
 		new_file_name	=	info.getSeries();
 		if(!info.getVolume().isEmpty()) new_file_name += QString(" Vol. ") + info.getVolume();
