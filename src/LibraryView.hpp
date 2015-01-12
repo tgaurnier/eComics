@@ -23,6 +23,7 @@
 
 #include <QAbstractListModel>
 #include <QListView>
+#include <QPointer>
 
 #include "ReferenceList.hpp"
 
@@ -57,8 +58,9 @@ class LibraryView : public QListView {
 				static void init(QObject *parent);
 				static void destroy();
 				QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-				//Qt::ItemFlags flags(const QModelIndex &index) const; TODO
-				//QMimeData * mimeData(const QModelIndexList &index_list) const; TODO
+				Qt::ItemFlags flags(const QModelIndex &index) const;
+				bool isTopLevelScope() const;
+				QMimeData * mimeData(const QModelIndexList &index_list) const;
 				int rowCount(const QModelIndex &parent = QModelIndex()) const;
 				void refreshList();
 				void setSelectedLibrary(const QString &library);
@@ -86,6 +88,7 @@ class LibraryView : public QListView {
 
 				LibraryView *parent;
 				QStringList list;
+				mutable QPointer<QMimeData> mime_data;
 
 				// Variables to keep track of scope
 				struct ScopeState {

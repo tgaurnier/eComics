@@ -1,7 +1,9 @@
 #include "LibraryView.hpp"
 
-//#include <QPalette>
+#include <QDesktopServices>
+#include <QMimeData>
 #include <QPainter>
+#include <QUrl>
 
 #include "Actions.hpp"
 #include "ComicFile.hpp"
@@ -169,7 +171,9 @@ void LibraryView::onSelectionChanged(const QItemSelection &selected,
 		eComics::actions->deleteFile()->setEnabled(false);
 		eComics::actions->convert()->setEnabled(false);
 	} else {
-		eComics::actions->open()->setEnabled(true);
+		if(model->isTopLevelScope()) {
+			eComics::actions->open()->setEnabled(true);
+		}
 		eComics::actions->addToList()->setEnabled(true);
 		eComics::actions->info()->setEnabled(true);
 		eComics::actions->remove()->setEnabled(true);
@@ -261,14 +265,74 @@ QVariant LibraryView::LibraryModel::data(const QModelIndex &index, int role) con
 }
 
 
-//Qt::ItemFlags LibraryModel::flags(const QModelIndex &index) const {
-//	//TODO: DO WE NEED FLAGS?
-//}
+Qt::ItemFlags LibraryView::LibraryModel::flags(const QModelIndex &index) const {
+	return Qt::ItemFlags(Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled);
+}
 
 
-//QMimeData * LibraryModel::mimeData(const QModelIndexList &index_list) const {
-//	//TODO: IMPLEMENT MIMEDATA() FOR DRAG/DROPPING COMICS
-//}
+bool LibraryView::LibraryModel::isTopLevelScope() const {
+	switch(cur_scope.category) {
+		case PUBLISHER_SCOPE:
+		case SERIES_SCOPE:
+		case VOLUME_SCOPE:
+			return false;
+
+		case TITLE_SCOPE:
+		case LIST_SCOPE:
+			return true;
+	}
+}
+
+
+QMimeData * LibraryView::LibraryModel::mimeData(const QModelIndexList &index_list) const {
+	if(index_list.size() > 0) {
+		if(mime_data.isNull()) mime_data = new QMimeData();
+		mime_data->clear();
+		QList<QUrl> url_list;
+
+		for(const QModelIndex &index : index_list) {
+			const QString &str = list.at(index.row());
+			QList<ComicFile> comic_list;
+
+			switch(cur_scope.category) {
+				case PUBLISHER_SCOPE:
+					comic_list = library->getComicsFromPublisher(str);
+					for(ComicFile comic : comic_list) {
+						url_list << QUrl(QString("file://") +
+							comic.getPath().toLocal8Bit().toPercentEncoding("/"));
+					}
+					break;
+
+				case SERIES_SCOPE:
+					comic_list = library->getComicsFromSeries(str, cur_scope.publisher);
+					for(ComicFile comic : comic_list) {
+						url_list << QUrl(QString("file://") +
+							comic.getPath().toLocal8Bit().toPercentEncoding("/"));
+					}
+					break;
+
+				case VOLUME_SCOPE:
+					comic_list = library->getComicsFromVolume(
+						cur_scope.series, str, cur_scope.publisher
+					);
+					for(ComicFile comic : comic_list) {
+						url_list << QUrl(QString("file://") +
+							comic.getPath().toLocal8Bit().toPercentEncoding("/"));
+					}
+					break;
+
+				case TITLE_SCOPE:
+				case LIST_SCOPE:
+					url_list << QUrl(QString("file://") + library->at(
+						str.toLocal8Bit()).getPath().toLocal8Bit().toPercentEncoding("/"));
+					break;
+			}
+		}
+
+		mime_data->setUrls(url_list);
+		return mime_data;
+	} else return 0;
+}
 
 
 /**
@@ -338,6 +402,9 @@ void LibraryView::LibraryModel::refreshList() {
 			(!config->groupByPublisher() && cur_scope.category == SERIES_SCOPE)) {
 		tool_bar->disableBackButton();
 	} else tool_bar->enableBackButton();
+
+	// Select first comic in new scope
+	library_view->setCurrentIndex(index(0, 0, QModelIndex()));
 }
 
 
@@ -407,8 +474,8 @@ void LibraryView::LibraryModel::onItemActivated(const QModelIndex &index) {
 
 		case TITLE_SCOPE:
 		case LIST_SCOPE:
-			// TODO: OPEN COMIC TO VIEW
-			qDebug() << "OPENING: " << library->at(list.at(index.row()).toLocal8Bit()).getPath();
+			QDesktopServices::openUrl(QUrl(QString("file://") +
+				library->at(list.at(index.row()).toLocal8Bit()).getPath()));
 			break;
 	}
 
@@ -422,11 +489,14 @@ void LibraryView::LibraryModel::onItemActivated(const QModelIndex &index) {
 
 
 LibraryView::LibraryModel::LibraryModel(QObject *parent) : QAbstractListModel(parent) {
-	parent = (LibraryView*)parent;
+	parent		=	(LibraryView*)parent;
+	mime_data	=	new QMimeData();
 }
 
 
-LibraryView::LibraryModel::~LibraryModel() {}
+LibraryView::LibraryModel::~LibraryModel() {
+	if(mime_data != 0) delete mime_data;
+}
 
 
 /**
