@@ -51,9 +51,7 @@ void MainSidePane::refreshLists() {
 void MainSidePane::initSelectedList() {
 	// Set selected library or list
 	//TODO: SELECT LAST SELECTED LIBRARY OR USER-MADE LIST, FOR NOW JUST SELECT COMICS OR MANGA LIBRARY
-	library_list_view->setCurrentIndex(library_list_view->model()->index(
-		(config->isComicEnabled() ? 0 : 1), 0, QModelIndex()
-	));
+	library_list_view->setCurrentIndex(library_list_view->model()->index(0, 0, QModelIndex()));
 }
 
 
