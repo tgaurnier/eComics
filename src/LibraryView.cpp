@@ -153,6 +153,15 @@ LibraryView::LibraryView(QWidget *parent) : QListView(parent) {
 		eComics::actions->deleteFile()->setEnabled(false);
 		eComics::actions->convert()->setEnabled(false);
 	}
+
+	// Add actions for right-clicks on comics
+	addAction(eComics::actions->open());
+	addAction(eComics::actions->addToList());
+	addAction(eComics::actions->info());
+	addAction(eComics::actions->remove());
+	addAction(eComics::actions->deleteFile());
+	addAction(eComics::actions->convert());
+	setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 
 
