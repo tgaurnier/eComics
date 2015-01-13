@@ -241,7 +241,7 @@ QVariant LibraryView::LibraryModel::data(const QModelIndex &index, int role) con
 				return list.at(index.row());
 
 			case VOLUME_SCOPE:
-				return cur_scope.series + "\nVol." + list.at(index.row());
+				return cur_scope.series + "\nVol. " + list.at(index.row());
 
 			case TITLE_SCOPE:
 			case LIST_SCOPE: {
