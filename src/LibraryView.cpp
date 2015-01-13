@@ -395,6 +395,7 @@ void LibraryView::LibraryModel::refreshList() {
 		}
 	}
 
+	qSort(list);
 	emit layoutChanged();
 
 	// Update ToolBar by enabling/disabling back button
