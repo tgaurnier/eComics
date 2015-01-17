@@ -58,7 +58,28 @@ ToolBar::~ToolBar() {}
 void ToolBar::initActions() {
 	eComics::actions->setToolBarAction(toggleViewAction());
 
+	info_action = new QAction(QIcon::fromTheme("info"), eComics::actions->info()->text(), this);
+	connect(eComics::actions->info(), SIGNAL(changed()), this, SLOT(onInfoActionChanged()));
+	connect(eComics::actions->info(), SIGNAL(triggered()), info_action, SIGNAL(triggered()));
+
 	addAction(eComics::actions->navigateBack());
-	addAction(eComics::actions->info());
+	addAction(info_action);
 	//TODO: FINISH ADDING ACTIONS
+}
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *										TOOLBAR PRIVATE SLOTS 									 *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+/**
+ * When info action from eComics::Actions is disabled or enabled, mimic that in toolbar version.
+ */
+void ToolBar::onInfoActionChanged() {
+	if(eComics::actions->info()->isEnabled()) {
+		info_action->setEnabled(true);
+	} else {
+		info_action->setEnabled(false);
+	}
 }

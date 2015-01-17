@@ -24,9 +24,11 @@
 #include <QWidget>
 #include <QListView>
 
-class QStringListModel;
-class QVBoxLayout;
+
 class QLabel;
+class QStringListModel;
+class QToolBar;
+class QVBoxLayout;
 
 
 /**
@@ -85,6 +87,10 @@ class MainSidePane : public QWidget {
 		QLabel *lists_label;
 		static LibraryListView *library_list_view;
 		static UserListView *user_list_view;
+		QToolBar *tool_bar;
+		QAction *new_list_action;
+		QAction *remove_list_action;
+		QAction *edit_list_action;
 		bool is_visible;
 
 		MainSidePane(QWidget *parent);
@@ -94,6 +100,11 @@ class MainSidePane : public QWidget {
 
 	private slots:
 		void toggleVisibility(bool visible);
+		void onEditListActionChanged();
+		void onNewListActionChanged();
+		void onRemoveListActionChanged();
+		void onUserListViewSelectionChanged(const QItemSelection &selected,
+			const QItemSelection &deselected);
 };
 
 

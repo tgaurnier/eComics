@@ -33,6 +33,8 @@ class QLabel;
  * Toolbar with various buttons, can be snapped to any side/top/bottom of LibraryView.
  */
 class ToolBar : public QToolBar {
+	Q_OBJECT
+
 	public:
 		static void init(QWidget *parent = 0);
 		static void destroy();
@@ -40,9 +42,15 @@ class ToolBar : public QToolBar {
 		void enableBackButton();
 
 	private:
+		// These actions connect directly to the global eComics::Actions, but these ones have icons
+		QAction *info_action;
+
 		ToolBar(const QString &title, QWidget *parent);
 		~ToolBar();
 		void initActions();
+
+	private slots:
+		void onInfoActionChanged();
 };
 
 

@@ -52,6 +52,8 @@ namespace eComics {
 			QAction * addComics() const { return add_comics_action; }
 			QAction * quit() const { return quit_action; }
 			// Getters for edit actions
+			QAction * removeList() const { return remove_list_action; }
+			QAction * editList() const { return edit_list_action; }
 			QAction * addToList() const { return add_to_list_action; }
 			QAction * info() const { return info_action; }
 			QAction * remove() const { return remove_action; }
@@ -86,6 +88,8 @@ namespace eComics {
 			QAction *add_comics_action;
 			QAction *quit_action;
 			// Edit actions
+			QAction *remove_list_action;
+			QAction *edit_list_action;
 			QAction *add_to_list_action;
 			QAction *info_action;
 			QAction *remove_action; // Removes from library and moves file(s) to desktop
@@ -110,7 +114,6 @@ namespace eComics {
 			Actions(QWidget *parent);
 			~Actions();
 	};
-
 
 	extern Actions *actions;
 }

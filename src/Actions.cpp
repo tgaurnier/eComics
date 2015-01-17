@@ -55,6 +55,8 @@ Actions::Actions(QWidget *parent) {
 	quit_action			=	new QAction(tr("&Quit"), parent);
 
 	// Create edit actions
+	remove_list_action	=	new QAction(tr("Remove List"), parent);
+	edit_list_action	=	new QAction(tr("Edit List"), parent);
 	add_to_list_action	=	new QAction(tr("&Add to List"), parent);
 	info_action			=	new QAction(tr("&Info"), parent);
 	remove_action		=	new QAction(tr("Remove from Library"), parent);

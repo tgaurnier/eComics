@@ -1,10 +1,12 @@
 #include "MainSidePane.hpp"
 
+#include <QApplication>
 #include <QLabel>
 #include <QListView>
-#include <QVBoxLayout>
 #include <QSettings>
 #include <QStringListModel>
+#include <QToolBar>
+#include <QVBoxLayout>
 
 #include "Actions.hpp"
 #include "Config.hpp"
@@ -65,14 +67,57 @@ MainSidePane::MainSidePane(QWidget *parent) : QWidget(parent) {
 	layout			=	new QVBoxLayout(this);
 	library_label	=	new QLabel(tr("Library"), this);
 	lists_label		=	new QLabel(tr("Lists"), this);
+	tool_bar		=	new QToolBar(this);
 	LibraryListView::init(this);
 	UserListView::init(this);
+
+	// Set tool bar icons to small
+	int metric = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
+	tool_bar->setIconSize(QSize(metric, metric));
+	tool_bar->setFixedHeight(metric + 5);
+
+	/**
+	 * NOTE
+	 *
+	 * MainSidePane has local versions of actions that go on toolbar below UserListView, they
+	 * connect directly to the global versions from eComics::Actions, however these local versions
+	 * add icons for the toolbar.
+	 */
+
+	// Prepare local version of 'add list action'
+	new_list_action = new QAction(
+		QIcon::fromTheme("list-add"), eComics::actions->newList()->text(), this);
+	connect(eComics::actions->newList(), SIGNAL(changed()), this, SLOT(onNewListActionChanged()));
+	connect(eComics::actions->newList(), SIGNAL(triggered()), new_list_action, SIGNAL(triggered()));
+
+	// Prepare local version of 'remove list action'
+	remove_list_action = new QAction(
+		QIcon::fromTheme("list-remove"), eComics::actions->removeList()->text(), this);
+	connect(eComics::actions->removeList(), SIGNAL(changed()),
+		this, SLOT(onRemoveListActionChanged()));
+	connect(eComics::actions->removeList(), SIGNAL(triggered()),
+			remove_list_action, SIGNAL(triggered()));
+	remove_list_action->setEnabled(false);
+
+	// Prepare local version of 'edit list action'
+	edit_list_action = new QAction(
+		QIcon::fromTheme("document-properties"), eComics::actions->editList()->text(), this);
+	connect(eComics::actions->editList(), SIGNAL(changed()), this, SLOT(onEditListActionChanged()));
+	connect(eComics::actions->editList(), SIGNAL(triggered()),
+		edit_list_action, SIGNAL(triggered()));
+	edit_list_action->setEnabled(false);
+
+	// Setup tool bar
+	tool_bar->addAction(new_list_action);
+	tool_bar->addAction(remove_list_action);
+	tool_bar->addAction(edit_list_action);
 
 	// Add items to layout and root widget
 	layout->addWidget(library_label);
 	layout->addWidget(library_list_view);
 	layout->addWidget(lists_label);
 	layout->addWidget(user_list_view);
+	layout->addWidget(tool_bar);
 	setLayout(layout);
 
 	// Set width
@@ -86,17 +131,14 @@ MainSidePane::MainSidePane(QWidget *parent) : QWidget(parent) {
 
 
 MainSidePane::~MainSidePane() {
+	delete new_list_action;
+	delete remove_list_action;
+	delete edit_list_action;
 	delete layout;
 	delete library_label;
 	delete lists_label;
 	LibraryListView::destroy();
 	LibraryListView::destroy();
-}
-
-
-void MainSidePane::toggleVisibility(bool visible) {
-	setVisible(visible);
-	is_visible = visible;
 }
 
 
@@ -123,6 +165,60 @@ void MainSidePane::restoreSettings() {
 void MainSidePane::saveSettings() {
 	QSettings settings("ToryGaurnier", "eComics");
 	settings.setValue("MainSidePane.Visible", is_visible);
+}
+
+
+void MainSidePane::toggleVisibility(bool visible) {
+	setVisible(visible);
+	is_visible = visible;
+}
+
+
+/**
+ * When edit list action from eComics::Actions is disabled or enabled, mimic that here.
+ */
+void MainSidePane::onEditListActionChanged() {
+	if(eComics::actions->info()->isEnabled()) {
+		edit_list_action->setEnabled(true);
+	} else {
+		edit_list_action->setEnabled(false);
+	}
+}
+
+
+/**
+ * When new list action from eComics::Actions is disabled or enabled, mimic that here.
+ */
+void MainSidePane::onNewListActionChanged() {
+	if(eComics::actions->info()->isEnabled()) {
+		new_list_action->setEnabled(true);
+	} else {
+		new_list_action->setEnabled(false);
+	}
+}
+
+
+/**
+ * When remove list action from eComics::Actions is disabled or enabled, mimic that here.
+ */
+void MainSidePane::onRemoveListActionChanged() {
+	if(eComics::actions->info()->isEnabled()) {
+		remove_list_action->setEnabled(true);
+	} else {
+		remove_list_action->setEnabled(false);
+	}
+}
+
+
+void MainSidePane::onUserListViewSelectionChanged(const QItemSelection &selected,
+		const QItemSelection &deselected) {
+	if(selected.size() == 0) {
+		eComics::actions->removeList()->setEnabled(false);
+		eComics::actions->editList()->setEnabled(false);
+	} else {
+		eComics::actions->removeList()->setEnabled(true);
+		eComics::actions->editList()->setEnabled(true);
+	}
 }
 
 
